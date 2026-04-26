@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>MAS Flow — Test Dashboard</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;
+             background:#0f0f1a;color:#e2e8f0;min-height:100vh;}
+
+        header{background:linear-gradient(135deg,#1a1a2e,#16213e);
+               padding:24px 40px;display:flex;justify-content:space-between;
+               align-items:center;border-bottom:1px solid rgba(255,255,255,0.08);}
+        header h1{font-size:22px;font-weight:700;color:white;}
+        header p{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;}
+        .live-badge{background:#22c55e;color:white;padding:4px 12px;
+                    border-radius:20px;font-size:11px;font-weight:700;
+                    animation:pulse 2s infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
+
+        .container{padding:28px 40px;}
+
+        .summary-grid{display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+            gap:16px;margin-bottom:28px;}
+        .stat-card{background:#1e1e2e;border-radius:12px;padding:20px 24px;
+                   text-align:center;border:1px solid rgba(255,255,255,0.06);}
+        .stat-card .val{font-size:36px;font-weight:700;margin-bottom:4px;}
+        .stat-card .lbl{font-size:12px;color:rgba(255,255,255,0.5);}
+        .stat-card.runs   .val{color:#818cf8;}
+        .stat-card.tests  .val{color:#94a3b8;}
+        .stat-card.passed .val{color:#22c55e;}
+        .stat-card.failed .val{color:#ef4444;}
+        .stat-card.rate   .val{color:#f59e0b;}
+
+        .chart-wrap{background:#1e1e2e;border-radius:12px;padding:20px 24px;
+                    margin-bottom:28px;border:1px solid rgba(255,255,255,0.06);}
+        .chart-wrap h3{font-size:14px;font-weight:600;color:#94a3b8;
+                       margin-bottom:16px;}
+        .chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;
+                    overflow-x:auto;padding-bottom:4px;}
+        .bar-group{display:flex;flex-direction:column;align-items:center;
+                   min-width:48px;gap:2px;}
+        .bar-stack{display:flex;flex-direction:column;justify-content:flex-end;
+                   width:32px;height:100px;}
+        .bar-pass{background:#22c55e;border-radius:2px 2px 0 0;}
+        .bar-fail{background:#ef4444;}
+        .bar-skip{background:#f59e0b;border-radius:0 0 2px 2px;}
+        .bar-label{font-size:9px;color:#64748b;text-align:center;
+                   margin-top:4px;white-space:nowrap;}
+        .bar-tip{font-size:9px;color:#94a3b8;text-align:center;}
+
+        .controls{display:flex;gap:12px;margin-bottom:20px;
+                  flex-wrap:wrap;align-items:center;}
+        .search-input{flex:1;min-width:200px;padding:10px 16px;
+                      border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+                      background:#1e1e2e;color:white;font-size:13px;}
+        .search-input::placeholder{color:#64748b;}
+        .filter-btn{padding:8px 16px;border-radius:8px;
+                    border:1px solid rgba(255,255,255,0.1);
+                    background:#1e1e2e;color:#94a3b8;
+                    cursor:pointer;font-size:12px;font-weight:600;}
+        .filter-btn.active{background:#818cf8;color:white;
+                           border-color:#818cf8;}
+
+        .runs-wrap{background:#1e1e2e;border-radius:12px;
+                   border:1px solid rgba(255,255,255,0.06);
+                   overflow:hidden;margin-bottom:28px;}
+        .runs-wrap h3{padding:16px 20px;font-size:14px;font-weight:600;
+                      color:#94a3b8;
+                      border-bottom:1px solid rgba(255,255,255,0.06);}
+        table{width:100%;border-collapse:collapse;}
+        th{padding:10px 16px;font-size:11px;font-weight:600;color:#64748b;
+           text-align:left;text-transform:uppercase;
+           border-bottom:1px solid rgba(255,255,255,0.06);}
+        td{padding:12px 16px;font-size:13px;
+           border-bottom:1px solid rgba(255,255,255,0.04);
+           vertical-align:middle;}
+        tr:hover td{background:rgba(255,255,255,0.03);}
+        tr:last-child td{border:none;}
+
+        .pill{padding:3px 10px;border-radius:20px;
+              font-size:11px;font-weight:700;}
+        .pill.pass{background:#14532d;color:#22c55e;}
+        .pill.fail{background:#7f1d1d;color:#f87171;}
+        .pill.mix {background:#713f12;color:#fbbf24;}
+
+        .pass-rate-bar{height:6px;background:#374151;border-radius:3px;
+                       overflow:hidden;margin-top:4px;width:80px;}
+        .pass-rate-fill{height:100%;border-radius:3px;background:#22c55e;}
+
+        .expand-btn{background:#2d2d44;border:none;color:#818cf8;
+                    padding:5px 12px;border-radius:6px;cursor:pointer;
+                    font-size:11px;font-weight:600;}
+        .expand-btn:hover{background:#3d3d5c;}
+
+        .run-detail{display:none;background:#161625;}
+        .run-detail.open{display:table-row;}
+        .run-detail td{padding:0;}
+        .detail-inner{padding:16px 20px;}
+        .detail-grid{display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+            gap:10px;}
+
+        .test-row{background:#1e1e2e;border-radius:8px;padding:12px 16px;
+                  border-left:3px solid #374151;font-size:12px;}
+        .test-row.passed {border-left-color:#22c55e;}
+        .test-row.failed {border-left-color:#ef4444;}
+        .test-row.skipped{border-left-color:#f59e0b;}
+        .test-row-name{font-weight:600;margin-bottom:4px;color:#e2e8f0;}
+        .test-row-meta{color:#64748b;font-size:11px;}
+        .test-row-err{color:#f87171;font-size:11px;margin-top:6px;
+                      background:#2d1515;padding:6px 8px;border-radius:4px;}
+
+        /* Stack trace */
+        .stack-toggle{margin-top:8px;font-size:11px;color:#818cf8;
+                      cursor:pointer;user-select:none;display:flex;
+                      align-items:center;gap:8px;}
+        .stack-toggle:hover .st-label{text-decoration:underline;}
+        .stack-arrow{font-size:10px;display:inline-block;
+                     transition:transform 0.2s;}
+        .stack-box{display:none;margin-top:6px;background:#0f0f1a;
+                   border-radius:6px;padding:10px 12px;
+                   font-family:'Courier New',monospace;font-size:11px;
+                   white-space:pre-wrap;word-break:break-word;
+                   max-height:200px;overflow-y:auto;
+                   border:1px solid rgba(255,255,255,0.08);}
+        .stack-box.open{display:block;}
+        .st-cause{color:#f38ba8;font-weight:bold;display:block;}
+        .st-own  {color:#a6e3a1;display:block;}
+        .st-lib  {color:#89b4fa;display:block;}
+        .dl-btn  {font-size:10px;color:#64748b;background:#1e1e2e;
+                  border:1px solid rgba(255,255,255,0.1);border-radius:4px;
+                  padding:2px 8px;cursor:pointer;white-space:nowrap;}
+        .dl-btn:hover{color:#e2e8f0;
+                      border-color:rgba(255,255,255,0.3);}
+
+        /* Screenshot thumbnail */
+        .screenshot-thumb{margin-top:10px;}
+        .screenshot-thumb img{width:100%;max-width:260px;
+                              border-radius:6px;border:2px solid #ef4444;
+                              cursor:pointer;display:block;
+                              transition:transform 0.2s;}
+        .screenshot-thumb img:hover{transform:scale(1.02);}
+        .screenshot-thumb .shot-label{font-size:10px;color:#64748b;
+                                       margin-bottom:4px;}
+
+        .lightbox{display:none;position:fixed;top:0;left:0;
+                  width:100%;height:100%;background:rgba(0,0,0,0.9);
+                  z-index:999;justify-content:center;align-items:center;}
+        .lightbox.active{display:flex;}
+        .lightbox img{max-width:90%;max-height:85%;border-radius:8px;}
+        .lightbox-close{position:fixed;top:20px;right:30px;
+                        color:white;font-size:36px;cursor:pointer;}
+
+        .pagination{display:flex;justify-content:center;
+                    gap:8px;margin-top:16px;flex-wrap:wrap;}
+        .page-btn{padding:6px 14px;border-radius:6px;
+                  border:1px solid rgba(255,255,255,0.1);
+                  background:#1e1e2e;color:#94a3b8;
+                  cursor:pointer;font-size:12px;}
+        .page-btn.active{background:#818cf8;color:white;
+                         border-color:#818cf8;}
+        .page-btn:hover:not(.active){background:#2d2d44;}
+
+        footer{text-align:center;padding:20px;font-size:11px;
+               color:rgba(255,255,255,0.3);}
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>🧪 MAS Flow — Test Dashboard</h1>
+        <p>Last updated: 26 Apr 2026, 20:41:58</p>
+    </div>
+    <span class="live-badge">● LIVE</span>
+</header>
+<div class='container'><div class="summary-grid">
+    <div class="stat-card runs">
+        <div class="val">4</div><div class="lbl">Total Runs</div>
+    </div>
+    <div class="stat-card tests">
+        <div class="val">9</div><div class="lbl">Total Tests</div>
+    </div>
+    <div class="stat-card passed">
+        <div class="val">4</div><div class="lbl">Total Passed</div>
+    </div>
+    <div class="stat-card failed">
+        <div class="val">5</div><div class="lbl">Total Failed</div>
+    </div>
+    <div class="stat-card rate">
+        <div class="val">44%</div><div class="lbl">Avg Pass Rate</div>
+    </div>
+</div>
+<div class="chart-wrap">
+    <h3>📈 Pass/Fail Trend (last 50 runs)</h3>
+    <div class="chart-bars" id="trendChart"></div>
+</div>
+<div class="controls">
+    <input class="search-input" type="text" id="searchInput"
+           placeholder="🔍 Search by Run ID, date..."
+           oninput="filterRuns()"/>
+    <button class="filter-btn active"
+            onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn"
+            onclick="setFilter('pass',this)">✅ All Pass</button>
+    <button class="filter-btn"
+            onclick="setFilter('fail',this)">❌ Has Failures</button>
+</div>
+<div class="runs-wrap">
+    <h3>🗂️ All Runs</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Run ID</th>
+                <th>Timestamp</th>
+                <th>Total</th>
+                <th>Passed</th>
+                <th>Failed</th>
+                <th>Skipped</th>
+                <th>Pass Rate</th>
+                <th>Status</th>
+                <th>Detail</th>
+            </tr>
+        </thead>
+        <tbody id="runsBody">
+<tr class="run-row" data-filter="fail" data-search="RUN_20260426_204158 26 Apr 2026, 20:41:58">
+    <td style="font-family:monospace;color:#818cf8;">RUN_20260426_204158</td>
+    <td>26 Apr 2026, 20:41:58</td>
+    <td>2</td>
+    <td style="color:#22c55e;font-weight:700;">1</td>
+    <td style="color:#ef4444;font-weight:700;">1</td>
+    <td style="color:#f59e0b;">0</td>
+    <td>
+        <div>50%</div>
+        <div class="pass-rate-bar">
+            <div class="pass-rate-fill" style="width:50%"></div>
+        </div>
+    </td>
+    <td><span class="pill mix">⚠️ Mixed</span></td>
+    <td>
+        <button class="expand-btn" onclick="toggleDetail(0)">
+            ▼ Tests
+        </button>
+    </td>
+</tr>
+<tr class="run-detail" id="detail_0">
+    <td colspan="9">
+        <div class="detail-inner">
+            <div class="detail-grid">
+<div class="test-row passed">
+    <div class="test-row-name">✅ clickSideMenuButton</div>
+    <div class="test-row-meta">⏱ 4465 ms</div>
+</div><div class="test-row failed">
+    <div class="test-row-name">❌ clickSideMenuButtonAgain</div>
+    <div class="test-row-meta">⏱ 230 ms</div>
+<div class='test-row-err'>An element could not be located on the page using the given search parameters.</div><div class="stack-toggle">
+    <span class="st-label"
+          onclick="toggleStack('stack_0_clickSideMenuButtonAgain')">
+        📄 Stack Trace
+        <span class="stack-arrow"
+              id="arrow_stack_0_clickSideMenuButtonAgain">▼</span>
+    </span>
+    <button class="dl-btn"
+            onclick="downloadStack('clickSideMenuButtonAgain',`org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.
+For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Build info: version: '4.11.0', revision: '040bc5406b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'
+Driver info: io.appium.java_client.android.AndroidDriver
+Command: [94b54f5b-5f1f-4ac5-996c-600a569252fe, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]
+Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}
+Session ID: 94b54f5b-5f1f-4ac5-996c-600a569252fe
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)
+	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)
+	at org.openqa.selenium.remote.ElementLocation\$ElementFinder\$2.findElement(ElementLocation.java:165)
+	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)
+	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)
+	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)
+	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)
+	at org.testng.internal.invokers.TestInvoker\$MethodInvocationAgent.invoke(TestInvoker.java:957)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)
+	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)
+	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.testng.TestRunner.privateRun(TestRunner.java:848)
+	at org.testng.TestRunner.run(TestRunner.java:621)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:336)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)
+	at org.testng.TestNG.runSuites(TestNG.java:1114)
+	at org.testng.TestNG.run(TestNG.java:1082)
+	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)
+	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)
+`)">
+        ⬇ Download .txt
+    </button>
+</div>
+<div class="stack-box" id="stack_0_clickSideMenuButtonAgain">
+<span class='st-cause'>org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.</span>
+<span class='st-cause'>For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception</span>
+<span class='st-cause'>Build info: version: '4.11.0', revision: '040bc5406b'</span>
+<span class='st-cause'>System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'</span>
+<span class='st-cause'>Driver info: io.appium.java_client.android.AndroidDriver</span>
+<span class='st-cause'>Command: [94b54f5b-5f1f-4ac5-996c-600a569252fe, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]</span>
+<span class='st-cause'>Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}</span>
+<span class='st-cause'>Session ID: 94b54f5b-5f1f-4ac5-996c-600a569252fe</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)</span>
+<span class='st-lib'>	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation$ElementFinder$2.findElement(ElementLocation.java:165)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)</span>
+<span class='st-own'>	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Method.invoke(Method.java:569)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:957)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)</span>
+<span class='st-lib'>	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)</span>
+<span class='st-lib'>	at org.testng.TestRunner.privateRun(TestRunner.java:848)</span>
+<span class='st-lib'>	at org.testng.TestRunner.run(TestRunner.java:621)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.run(SuiteRunner.java:336)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuites(TestNG.java:1114)</span>
+<span class='st-lib'>	at org.testng.TestNG.run(TestNG.java:1082)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)</span>
+</div><div class="screenshot-thumb">
+    <div class="shot-label">📸 Failure screenshot</div>
+    <img src="https://res.cloudinary.com/dphb9swru/image/upload/v1777207316/MASFlow/screenshots/clickSideMenuButtonAgain.png"
+         onclick="openLightbox('https://res.cloudinary.com/dphb9swru/image/upload/v1777207316/MASFlow/screenshots/clickSideMenuButtonAgain.png')"
+         alt="Failure screenshot for clickSideMenuButtonAgain"
+         onerror="this.parentElement.style.display='none'"/>
+</div>
+</div></div></div></td></tr><tr class="run-row" data-filter="fail" data-search="RUN_20260426_203742 26 Apr 2026, 20:37:42">
+    <td style="font-family:monospace;color:#818cf8;">RUN_20260426_203742</td>
+    <td>26 Apr 2026, 20:37:42</td>
+    <td>2</td>
+    <td style="color:#22c55e;font-weight:700;">1</td>
+    <td style="color:#ef4444;font-weight:700;">1</td>
+    <td style="color:#f59e0b;">0</td>
+    <td>
+        <div>50%</div>
+        <div class="pass-rate-bar">
+            <div class="pass-rate-fill" style="width:50%"></div>
+        </div>
+    </td>
+    <td><span class="pill mix">⚠️ Mixed</span></td>
+    <td>
+        <button class="expand-btn" onclick="toggleDetail(1)">
+            ▼ Tests
+        </button>
+    </td>
+</tr>
+<tr class="run-detail" id="detail_1">
+    <td colspan="9">
+        <div class="detail-inner">
+            <div class="detail-grid">
+<div class="test-row passed">
+    <div class="test-row-name">✅ clickSideMenuButton</div>
+    <div class="test-row-meta">⏱ 4416 ms</div>
+</div><div class="test-row failed">
+    <div class="test-row-name">❌ clickSideMenuButtonAgain</div>
+    <div class="test-row-meta">⏱ 356 ms</div>
+<div class='test-row-err'>An element could not be located on the page using the given search parameters.</div><div class="stack-toggle">
+    <span class="st-label"
+          onclick="toggleStack('stack_1_clickSideMenuButtonAgain')">
+        📄 Stack Trace
+        <span class="stack-arrow"
+              id="arrow_stack_1_clickSideMenuButtonAgain">▼</span>
+    </span>
+    <button class="dl-btn"
+            onclick="downloadStack('clickSideMenuButtonAgain',`org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.
+For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Build info: version: '4.11.0', revision: '040bc5406b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'
+Driver info: io.appium.java_client.android.AndroidDriver
+Command: [6e483df9-89ca-4299-8a8f-fa566b3a4b3b, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]
+Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}
+Session ID: 6e483df9-89ca-4299-8a8f-fa566b3a4b3b
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)
+	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)
+	at org.openqa.selenium.remote.ElementLocation\$ElementFinder\$2.findElement(ElementLocation.java:165)
+	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)
+	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)
+	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)
+	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)
+	at org.testng.internal.invokers.TestInvoker\$MethodInvocationAgent.invoke(TestInvoker.java:957)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)
+	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)
+	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.testng.TestRunner.privateRun(TestRunner.java:848)
+	at org.testng.TestRunner.run(TestRunner.java:621)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:336)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)
+	at org.testng.TestNG.runSuites(TestNG.java:1114)
+	at org.testng.TestNG.run(TestNG.java:1082)
+	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)
+	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)
+`)">
+        ⬇ Download .txt
+    </button>
+</div>
+<div class="stack-box" id="stack_1_clickSideMenuButtonAgain">
+<span class='st-cause'>org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.</span>
+<span class='st-cause'>For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception</span>
+<span class='st-cause'>Build info: version: '4.11.0', revision: '040bc5406b'</span>
+<span class='st-cause'>System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'</span>
+<span class='st-cause'>Driver info: io.appium.java_client.android.AndroidDriver</span>
+<span class='st-cause'>Command: [6e483df9-89ca-4299-8a8f-fa566b3a4b3b, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]</span>
+<span class='st-cause'>Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}</span>
+<span class='st-cause'>Session ID: 6e483df9-89ca-4299-8a8f-fa566b3a4b3b</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)</span>
+<span class='st-lib'>	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation$ElementFinder$2.findElement(ElementLocation.java:165)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)</span>
+<span class='st-own'>	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Method.invoke(Method.java:569)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:957)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)</span>
+<span class='st-lib'>	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)</span>
+<span class='st-lib'>	at org.testng.TestRunner.privateRun(TestRunner.java:848)</span>
+<span class='st-lib'>	at org.testng.TestRunner.run(TestRunner.java:621)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.run(SuiteRunner.java:336)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuites(TestNG.java:1114)</span>
+<span class='st-lib'>	at org.testng.TestNG.run(TestNG.java:1082)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)</span>
+</div><div class="screenshot-thumb">
+    <div class="shot-label">📸 Failure screenshot</div>
+    <img src="https://res.cloudinary.com/dphb9swru/image/upload/v1777207060/MASFlow/screenshots/clickSideMenuButtonAgain.png"
+         onclick="openLightbox('https://res.cloudinary.com/dphb9swru/image/upload/v1777207060/MASFlow/screenshots/clickSideMenuButtonAgain.png')"
+         alt="Failure screenshot for clickSideMenuButtonAgain"
+         onerror="this.parentElement.style.display='none'"/>
+</div>
+</div></div></div></td></tr><tr class="run-row" data-filter="fail" data-search="RUN_20260426_203451 26 Apr 2026, 20:34:51">
+    <td style="font-family:monospace;color:#818cf8;">RUN_20260426_203451</td>
+    <td>26 Apr 2026, 20:34:51</td>
+    <td>2</td>
+    <td style="color:#22c55e;font-weight:700;">1</td>
+    <td style="color:#ef4444;font-weight:700;">1</td>
+    <td style="color:#f59e0b;">0</td>
+    <td>
+        <div>50%</div>
+        <div class="pass-rate-bar">
+            <div class="pass-rate-fill" style="width:50%"></div>
+        </div>
+    </td>
+    <td><span class="pill mix">⚠️ Mixed</span></td>
+    <td>
+        <button class="expand-btn" onclick="toggleDetail(2)">
+            ▼ Tests
+        </button>
+    </td>
+</tr>
+<tr class="run-detail" id="detail_2">
+    <td colspan="9">
+        <div class="detail-inner">
+            <div class="detail-grid">
+<div class="test-row passed">
+    <div class="test-row-name">✅ clickSideMenuButton</div>
+    <div class="test-row-meta">⏱ 4435 ms</div>
+</div><div class="test-row failed">
+    <div class="test-row-name">❌ clickSideMenuButtonAgain</div>
+    <div class="test-row-meta">⏱ 304 ms</div>
+<div class='test-row-err'>An element could not be located on the page using the given search parameters.</div><div class="stack-toggle">
+    <span class="st-label"
+          onclick="toggleStack('stack_2_clickSideMenuButtonAgain')">
+        📄 Stack Trace
+        <span class="stack-arrow"
+              id="arrow_stack_2_clickSideMenuButtonAgain">▼</span>
+    </span>
+    <button class="dl-btn"
+            onclick="downloadStack('clickSideMenuButtonAgain',`org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.
+For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Build info: version: '4.11.0', revision: '040bc5406b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'
+Driver info: io.appium.java_client.android.AndroidDriver
+Command: [7fd046db-9e8f-4988-b2f6-787f9edf1e7a, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]
+Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}
+Session ID: 7fd046db-9e8f-4988-b2f6-787f9edf1e7a
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)
+	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)
+	at org.openqa.selenium.remote.ElementLocation\$ElementFinder\$2.findElement(ElementLocation.java:165)
+	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)
+	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)
+	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)
+	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)
+	at org.testng.internal.invokers.TestInvoker\$MethodInvocationAgent.invoke(TestInvoker.java:957)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)
+	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)
+	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.testng.TestRunner.privateRun(TestRunner.java:848)
+	at org.testng.TestRunner.run(TestRunner.java:621)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:336)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)
+	at org.testng.TestNG.runSuites(TestNG.java:1114)
+	at org.testng.TestNG.run(TestNG.java:1082)
+	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)
+	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)
+`)">
+        ⬇ Download .txt
+    </button>
+</div>
+<div class="stack-box" id="stack_2_clickSideMenuButtonAgain">
+<span class='st-cause'>org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.</span>
+<span class='st-cause'>For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception</span>
+<span class='st-cause'>Build info: version: '4.11.0', revision: '040bc5406b'</span>
+<span class='st-cause'>System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'</span>
+<span class='st-cause'>Driver info: io.appium.java_client.android.AndroidDriver</span>
+<span class='st-cause'>Command: [7fd046db-9e8f-4988-b2f6-787f9edf1e7a, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]</span>
+<span class='st-cause'>Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}</span>
+<span class='st-cause'>Session ID: 7fd046db-9e8f-4988-b2f6-787f9edf1e7a</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)</span>
+<span class='st-lib'>	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation$ElementFinder$2.findElement(ElementLocation.java:165)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)</span>
+<span class='st-own'>	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Method.invoke(Method.java:569)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:957)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)</span>
+<span class='st-lib'>	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)</span>
+<span class='st-lib'>	at org.testng.TestRunner.privateRun(TestRunner.java:848)</span>
+<span class='st-lib'>	at org.testng.TestRunner.run(TestRunner.java:621)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.run(SuiteRunner.java:336)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuites(TestNG.java:1114)</span>
+<span class='st-lib'>	at org.testng.TestNG.run(TestNG.java:1082)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)</span>
+</div><div class="screenshot-thumb">
+    <div class="shot-label">📸 Failure screenshot</div>
+    <img src="https://res.cloudinary.com/dphb9swru/image/upload/v1777206889/MASFlow/screenshots/clickSideMenuButtonAgain.png"
+         onclick="openLightbox('https://res.cloudinary.com/dphb9swru/image/upload/v1777206889/MASFlow/screenshots/clickSideMenuButtonAgain.png')"
+         alt="Failure screenshot for clickSideMenuButtonAgain"
+         onerror="this.parentElement.style.display='none'"/>
+</div>
+</div></div></div></td></tr><tr class="run-row" data-filter="fail" data-search="RUN_20260426_203247 26 Apr 2026, 20:32:47">
+    <td style="font-family:monospace;color:#818cf8;">RUN_20260426_203247</td>
+    <td>26 Apr 2026, 20:32:47</td>
+    <td>3</td>
+    <td style="color:#22c55e;font-weight:700;">1</td>
+    <td style="color:#ef4444;font-weight:700;">2</td>
+    <td style="color:#f59e0b;">0</td>
+    <td>
+        <div>33%</div>
+        <div class="pass-rate-bar">
+            <div class="pass-rate-fill" style="width:33%"></div>
+        </div>
+    </td>
+    <td><span class="pill mix">⚠️ Mixed</span></td>
+    <td>
+        <button class="expand-btn" onclick="toggleDetail(3)">
+            ▼ Tests
+        </button>
+    </td>
+</tr>
+<tr class="run-detail" id="detail_3">
+    <td colspan="9">
+        <div class="detail-inner">
+            <div class="detail-grid">
+<div class="test-row passed">
+    <div class="test-row-name">✅ clickSideMenuButton</div>
+    <div class="test-row-meta">⏱ 4452 ms</div>
+</div><div class="test-row failed">
+    <div class="test-row-name">❌ clickSideMenuButtonAgain</div>
+    <div class="test-row-meta">⏱ 301 ms</div>
+<div class='test-row-err'>An element could not be located on the page using the given search parameters.</div><div class="stack-toggle">
+    <span class="st-label"
+          onclick="toggleStack('stack_3_clickSideMenuButtonAgain')">
+        📄 Stack Trace
+        <span class="stack-arrow"
+              id="arrow_stack_3_clickSideMenuButtonAgain">▼</span>
+    </span>
+    <button class="dl-btn"
+            onclick="downloadStack('clickSideMenuButtonAgain',`org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.
+For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Build info: version: '4.11.0', revision: '040bc5406b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'
+Driver info: io.appium.java_client.android.AndroidDriver
+Command: [d9987b6d-7d21-49c8-bf71-5673bedf90f3, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]
+Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}
+Session ID: d9987b6d-7d21-49c8-bf71-5673bedf90f3
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)
+	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)
+	at org.openqa.selenium.remote.ElementLocation\$ElementFinder\$2.findElement(ElementLocation.java:165)
+	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)
+	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)
+	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)
+	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)
+	at org.testng.internal.invokers.TestInvoker\$MethodInvocationAgent.invoke(TestInvoker.java:957)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)
+	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)
+	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.testng.TestRunner.privateRun(TestRunner.java:848)
+	at org.testng.TestRunner.run(TestRunner.java:621)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:336)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)
+	at org.testng.TestNG.runSuites(TestNG.java:1114)
+	at org.testng.TestNG.run(TestNG.java:1082)
+	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)
+	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)
+`)">
+        ⬇ Download .txt
+    </button>
+</div>
+<div class="stack-box" id="stack_3_clickSideMenuButtonAgain">
+<span class='st-cause'>org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.</span>
+<span class='st-cause'>For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception</span>
+<span class='st-cause'>Build info: version: '4.11.0', revision: '040bc5406b'</span>
+<span class='st-cause'>System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'</span>
+<span class='st-cause'>Driver info: io.appium.java_client.android.AndroidDriver</span>
+<span class='st-cause'>Command: [d9987b6d-7d21-49c8-bf71-5673bedf90f3, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]</span>
+<span class='st-cause'>Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}</span>
+<span class='st-cause'>Session ID: d9987b6d-7d21-49c8-bf71-5673bedf90f3</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)</span>
+<span class='st-lib'>	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation$ElementFinder$2.findElement(ElementLocation.java:165)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)</span>
+<span class='st-own'>	at Maintest.Maintestclass.clickSideMenuButtonAgain(Maintestclass.java:72)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Method.invoke(Method.java:569)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:957)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)</span>
+<span class='st-lib'>	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)</span>
+<span class='st-lib'>	at org.testng.TestRunner.privateRun(TestRunner.java:848)</span>
+<span class='st-lib'>	at org.testng.TestRunner.run(TestRunner.java:621)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.run(SuiteRunner.java:336)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuites(TestNG.java:1114)</span>
+<span class='st-lib'>	at org.testng.TestNG.run(TestNG.java:1082)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)</span>
+</div><div class="screenshot-thumb">
+    <div class="shot-label">📸 Failure screenshot</div>
+    <img src="https://res.cloudinary.com/dphb9swru/image/upload/v1777206762/MASFlow/screenshots/clickSideMenuButtonAgain.png"
+         onclick="openLightbox('https://res.cloudinary.com/dphb9swru/image/upload/v1777206762/MASFlow/screenshots/clickSideMenuButtonAgain.png')"
+         alt="Failure screenshot for clickSideMenuButtonAgain"
+         onerror="this.parentElement.style.display='none'"/>
+</div>
+</div><div class="test-row failed">
+    <div class="test-row-name">❌ clickSideMenuButtonLastRetry</div>
+    <div class="test-row-meta">⏱ 407 ms</div>
+<div class='test-row-err'>An element could not be located on the page using the given search parameters.</div><div class="stack-toggle">
+    <span class="st-label"
+          onclick="toggleStack('stack_3_clickSideMenuButtonLastRetry')">
+        📄 Stack Trace
+        <span class="stack-arrow"
+              id="arrow_stack_3_clickSideMenuButtonLastRetry">▼</span>
+    </span>
+    <button class="dl-btn"
+            onclick="downloadStack('clickSideMenuButtonLastRetry',`org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.
+For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception
+Build info: version: '4.11.0', revision: '040bc5406b'
+System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'
+Driver info: io.appium.java_client.android.AndroidDriver
+Command: [d9987b6d-7d21-49c8-bf71-5673bedf90f3, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]
+Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}
+Session ID: d9987b6d-7d21-49c8-bf71-5673bedf90f3
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)
+	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)
+	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)
+	at org.openqa.selenium.remote.ElementLocation\$ElementFinder\$2.findElement(ElementLocation.java:165)
+	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)
+	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)
+	at Maintest.Maintestclass.clickSideMenuButtonLastRetry(Maintestclass.java:83)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)
+	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)
+	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)
+	at org.testng.internal.invokers.TestInvoker\$MethodInvocationAgent.invoke(TestInvoker.java:957)
+	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)
+	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)
+	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.testng.TestRunner.privateRun(TestRunner.java:848)
+	at org.testng.TestRunner.run(TestRunner.java:621)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:336)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)
+	at org.testng.TestNG.runSuites(TestNG.java:1114)
+	at org.testng.TestNG.run(TestNG.java:1082)
+	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)
+	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)
+`)">
+        ⬇ Download .txt
+    </button>
+</div>
+<div class="stack-box" id="stack_3_clickSideMenuButtonLastRetry">
+<span class='st-cause'>org.openqa.selenium.NoSuchElementException: An element could not be located on the page using the given search parameters.</span>
+<span class='st-cause'>For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#no-such-element-exception</span>
+<span class='st-cause'>Build info: version: '4.11.0', revision: '040bc5406b'</span>
+<span class='st-cause'>System info: os.name: 'Windows 11', os.arch: 'amd64', os.version: '10.0', java.version: '17.0.18'</span>
+<span class='st-cause'>Driver info: io.appium.java_client.android.AndroidDriver</span>
+<span class='st-cause'>Command: [d9987b6d-7d21-49c8-bf71-5673bedf90f3, findElement {using=xpath, value=//android.widget.ImageView[@content-desc='Side Menu']}]</span>
+<span class='st-cause'>Capabilities {appium:appActivity: com.example.mh_app.MainActi..., appium:appPackage: aero.sita.lab.resmobileweb...., appium:automationName: UiAutomator2, appium:databaseEnabled: false, appium:desired: {appActivity: com.example.mh_app.MainActi..., appPackage: aero.sita.lab.resmobileweb...., automationName: UiAutomator2, deviceName: OPPO A93, disableHiddenApiPolicy: true, ignoreHiddenApiPolicyError: true, noReset: true, platformName: ANDROID, skipDeviceInitialization: true, udid: 9PC6SCEU5LUSZS69}, appium:deviceApiLevel: 31, appium:deviceManufacturer: OPPO, appium:deviceModel: CPH2121, appium:deviceName: 9PC6SCEU5LUSZS69, appium:deviceScreenDensity: 408, appium:deviceScreenSize: 1080x2400, appium:deviceUDID: 9PC6SCEU5LUSZS69, appium:disableHiddenApiPolicy: true, appium:ignoreHiddenApiPolicyError: true, appium:javascriptEnabled: true, appium:locationContextEnabled: false, appium:networkConnectionEnabled: true, appium:noReset: true, appium:pixelRatio: 2.55, appium:platformVersion: 12, appium:skipDeviceInitialization: true, appium:statBarHeight: 110, appium:takesScreenshot: true, appium:udid: 9PC6SCEU5LUSZS69, appium:viewportRect: {height: 2290, left: 0, top: 110, width: 1080}, appium:warnings: {}, appium:webStorageEnabled: false, platformName: ANDROID}</span>
+<span class='st-cause'>Session ID: d9987b6d-7d21-49c8-bf71-5673bedf90f3</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:500)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:481)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:200)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:133)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.codec.w3c.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:52)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:191)</span>
+<span class='st-lib'>	at io.appium.java_client.remote.AppiumCommandExecutor.execute(AppiumCommandExecutor.java:250)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:518)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation$ElementFinder$2.findElement(ElementLocation.java:165)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.ElementLocation.findElement(ElementLocation.java:59)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:355)</span>
+<span class='st-lib'>	at org.openqa.selenium.remote.RemoteWebDriver.findElement(RemoteWebDriver.java:349)</span>
+<span class='st-own'>	at Maintest.Maintestclass.clickSideMenuButtonLastRetry(Maintestclass.java:83)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)</span>
+<span class='st-lib'>	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</span>
+<span class='st-lib'>	at java.base/java.lang.reflect.Method.invoke(Method.java:569)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:139)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:664)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethod(TestInvoker.java:227)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.MethodRunner.runInSequence(MethodRunner.java:50)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:957)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestInvoker.invokeTestMethods(TestInvoker.java:200)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:148)</span>
+<span class='st-lib'>	at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)</span>
+<span class='st-lib'>	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)</span>
+<span class='st-lib'>	at org.testng.TestRunner.privateRun(TestRunner.java:848)</span>
+<span class='st-lib'>	at org.testng.TestRunner.run(TestRunner.java:621)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runTest(SuiteRunner.java:443)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:437)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:397)</span>
+<span class='st-lib'>	at org.testng.SuiteRunner.run(SuiteRunner.java:336)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)</span>
+<span class='st-lib'>	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1280)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuitesLocally(TestNG.java:1200)</span>
+<span class='st-lib'>	at org.testng.TestNG.runSuites(TestNG.java:1114)</span>
+<span class='st-lib'>	at org.testng.TestNG.run(TestNG.java:1082)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:65)</span>
+<span class='st-lib'>	at com.intellij.rt.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:105)</span>
+</div><div class="screenshot-thumb">
+    <div class="shot-label">📸 Failure screenshot</div>
+    <img src="https://res.cloudinary.com/dphb9swru/image/upload/v1777206765/MASFlow/screenshots/clickSideMenuButtonLastRetry.png"
+         onclick="openLightbox('https://res.cloudinary.com/dphb9swru/image/upload/v1777206765/MASFlow/screenshots/clickSideMenuButtonLastRetry.png')"
+         alt="Failure screenshot for clickSideMenuButtonLastRetry"
+         onerror="this.parentElement.style.display='none'"/>
+</div>
+</div></div></div></td></tr></tbody></table></div><div class='pagination' id='pagination'></div></div><div class="lightbox" id="lightbox"
+     onclick="this.classList.remove('active')">
+    <span class="lightbox-close">✕</span>
+    <img id="lightbox-img" src="" alt="screenshot"/>
+</div>
+<footer>
+    MAS Flow Dashboard • 4 total runs •
+    Powered by Appium + TestNG + Cloudinary
+</footer>
+
+<script>
+// ===== TREND CHART =====
+const chartData = [{id:'RUN_20260426_203247',pass:1,fail:2,skip:0,total:3},{id:'RUN_20260426_203451',pass:1,fail:1,skip:0,total:2},{id:'RUN_20260426_203742',pass:1,fail:1,skip:0,total:2},{id:'RUN_20260426_204158',pass:1,fail:1,skip:0,total:2}];
+const chartEl   = document.getElementById('trendChart');
+const maxTotal  = Math.max(...chartData.map(d => d.total), 1);
+
+chartData.forEach(d => {
+    const passH = Math.round((d.pass / maxTotal) * 100);
+    const failH = Math.round((d.fail / maxTotal) * 100);
+    const skipH = Math.round((d.skip / maxTotal) * 100);
+    chartEl.innerHTML += `
+        <div class="bar-group">
+            <div class="bar-tip">${d.pass}/${d.total}</div>
+            <div class="bar-stack">
+                <div class="bar-fail" style="height:${failH}px"></div>
+                <div class="bar-skip" style="height:${skipH}px"></div>
+                <div class="bar-pass" style="height:${passH}px"></div>
+            </div>
+            <div class="bar-label">${d.id.replace('RUN_','')}</div>
+        </div>`;
+});
+
+// ===== PAGINATION =====
+const PAGE_SIZE = 20;
+let currentPage   = 1;
+let currentFilter = 'all';
+
+function getVisibleRows() {
+    return Array.from(document.querySelectorAll('.run-row'))
+                .filter(r => r.style.display !== 'none');
+}
+
+function renderPagination() {
+    const rows  = getVisibleRows();
+    const pages = Math.ceil(rows.length / PAGE_SIZE);
+    const pagEl = document.getElementById('pagination');
+    pagEl.innerHTML = '';
+    if (pages <= 1) return;
+    for (let i = 1; i <= pages; i++) {
+        const btn = document.createElement('button');
+        btn.className   = 'page-btn' +
+                          (i === currentPage ? ' active' : '');
+        btn.textContent = i;
+        btn.onclick = () => { currentPage = i; applyPage(); };
+        pagEl.appendChild(btn);
+    }
+}
+
+function applyPage() {
+    const rows  = getVisibleRows();
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end   = start + PAGE_SIZE;
+    rows.forEach((r, i) => {
+        r.style.display = (i >= start && i < end) ? '' : 'none';
+    });
+    renderPagination();
+}
+
+// ===== FILTER =====
+function setFilter(type, btn) {
+    currentFilter = type;
+    currentPage   = 1;
+    document.querySelectorAll('.filter-btn')
+            .forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+}
+
+// ===== SEARCH =====
+function filterRuns() {
+    currentPage = 1;
+    applyFilters();
+}
+
+function applyFilters() {
+    const query = document.getElementById('searchInput')
+                          .value.toLowerCase();
+    document.querySelectorAll('.run-row').forEach(r => {
+        const matchFilter = currentFilter === 'all' ||
+                            r.dataset.filter === currentFilter;
+        const matchSearch = r.dataset.search
+                                      .toLowerCase()
+                                      .includes(query);
+        r.style.display = (matchFilter && matchSearch) ? '' : 'none';
+        const idx = r.querySelector('.expand-btn')
+                      .getAttribute('onclick')
+                      .match(/\d+/)[0];
+        const detail = document.getElementById('detail_' + idx);
+        if (detail) detail.classList.remove('open');
+    });
+    applyPage();
+}
+
+// ===== EXPAND/COLLAPSE RUN ROW =====
+function toggleDetail(idx) {
+    document.getElementById('detail_' + idx)
+            .classList.toggle('open');
+}
+
+// ===== STACK TRACE TOGGLE =====
+function toggleStack(id) {
+    const box   = document.getElementById(id);
+    const arrow = document.getElementById('arrow_' + id);
+    box.classList.toggle('open');
+    arrow.style.transform = box.classList.contains('open') ?
+            'rotate(180deg)' : 'rotate(0deg)';
+}
+
+// ===== STACK TRACE DOWNLOAD =====
+function downloadStack(methodName, stackText) {
+    const blob = new Blob([stackText], { type: 'text/plain' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = methodName + '_stacktrace.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ===== LIGHTBOX =====
+function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+    event.stopPropagation();
+}
+
+applyPage();
+</script>
+</body></html>
