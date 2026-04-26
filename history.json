@@ -221,4 +221,25 @@
         "stackTrace": ""
       }
     ]
+  },{
+    "runId": "RUN_20260426_213957",
+    "timestamp": "26 Apr 2026, 21:39:57",
+    "epochMs": 1777210797330,
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "passRate": 100,
+    "tests": [
+      {
+        "method": "clickSideMenuButton",
+        "className": "Maintest.Maintestclass",
+        "status": "passed",
+        "duration": 4533,
+        "startTime": "21:39:44",
+        "errorMessage": "",
+        "screenshotUrl": "",
+        "stackTrace": ""
+      }
+    ]
   }]
