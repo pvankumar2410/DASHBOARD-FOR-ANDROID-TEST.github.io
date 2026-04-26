@@ -113,7 +113,6 @@
         .test-row-err{color:#f87171;font-size:11px;margin-top:6px;
                       background:#2d1515;padding:6px 8px;border-radius:4px;}
 
-        /* Stack trace */
         .stack-toggle{margin-top:8px;font-size:11px;color:#818cf8;
                       cursor:pointer;user-select:none;display:flex;
                       align-items:center;gap:8px;}
@@ -133,10 +132,8 @@
         .dl-btn  {font-size:10px;color:#64748b;background:#1e1e2e;
                   border:1px solid rgba(255,255,255,0.1);border-radius:4px;
                   padding:2px 8px;cursor:pointer;white-space:nowrap;}
-        .dl-btn:hover{color:#e2e8f0;
-                      border-color:rgba(255,255,255,0.3);}
+        .dl-btn:hover{color:#e2e8f0;border-color:rgba(255,255,255,0.3);}
 
-        /* Screenshot thumbnail */
         .screenshot-thumb{margin-top:10px;}
         .screenshot-thumb img{width:100%;max-width:260px;
                               border-radius:6px;border:2px solid #ef4444;
@@ -160,9 +157,10 @@
                   border:1px solid rgba(255,255,255,0.1);
                   background:#1e1e2e;color:#94a3b8;
                   cursor:pointer;font-size:12px;}
-        .page-btn.active{background:#818cf8;color:white;
-                         border-color:#818cf8;}
+        .page-btn.active{background:#818cf8;color:white;border-color:#818cf8;}
         .page-btn:hover:not(.active){background:#2d2d44;}
+
+        .loading{text-align:center;padding:40px;color:#64748b;font-size:14px;}
 
         footer{text-align:center;padding:20px;font-size:11px;
                color:rgba(255,255,255,0.3);}
@@ -172,83 +170,116 @@
 <header>
     <div>
         <h1>🧪 MAS Flow — Test Dashboard</h1>
-        <p>Last updated: 26 Apr 2026, 20:41:58</p>
+        <p id="lastUpdated">Loading...</p>
     </div>
     <span class="live-badge">● LIVE</span>
 </header>
-<div class='container'><div class="summary-grid">
-    <div class="stat-card runs">
-        <div class="val">4</div><div class="lbl">Total Runs</div>
+
+<div class="container">
+    <div class="summary-grid">
+        <div class="stat-card runs">
+            <div class="val" id="statRuns">—</div>
+            <div class="lbl">Total Runs</div>
+        </div>
+        <div class="stat-card tests">
+            <div class="val" id="statTests">—</div>
+            <div class="lbl">Total Tests</div>
+        </div>
+        <div class="stat-card passed">
+            <div class="val" id="statPassed">—</div>
+            <div class="lbl">Total Passed</div>
+        </div>
+        <div class="stat-card failed">
+            <div class="val" id="statFailed">—</div>
+            <div class="lbl">Total Failed</div>
+        </div>
+        <div class="stat-card rate">
+            <div class="val" id="statRate">—</div>
+            <div class="lbl">Avg Pass Rate</div>
+        </div>
     </div>
-    <div class="stat-card tests">
-        <div class="val">9</div><div class="lbl">Total Tests</div>
+
+    <div class="chart-wrap">
+        <h3>📈 Pass/Fail Trend (last 50 runs)</h3>
+        <div class="chart-bars" id="trendChart">
+            <div class="loading">Loading chart...</div>
+        </div>
     </div>
-    <div class="stat-card passed">
-        <div class="val">4</div><div class="lbl">Total Passed</div>
+
+    <div class="controls">
+        <input class="search-input" type="text" id="searchInput"
+               placeholder="🔍 Search by Run ID, date..."
+               oninput="filterRuns()"/>
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('pass',this)">✅ All Pass</button>
+        <button class="filter-btn" onclick="setFilter('fail',this)">❌ Has Failures</button>
     </div>
-    <div class="stat-card failed">
-        <div class="val">5</div><div class="lbl">Total Failed</div>
+
+    <div class="runs-wrap">
+        <h3>🗂️ All Runs</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Run ID</th>
+                    <th>Timestamp</th>
+                    <th>Total</th>
+                    <th>Passed</th>
+                    <th>Failed</th>
+                    <th>Skipped</th>
+                    <th>Pass Rate</th>
+                    <th>Status</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody id="runsBody">
+                <tr><td colspan="9" class="loading">⏳ Loading runs...</td></tr>
+            </tbody>
+        </table>
     </div>
-    <div class="stat-card rate">
-        <div class="val">44%</div><div class="lbl">Avg Pass Rate</div>
-    </div>
+
+    <div class="pagination" id="pagination"></div>
 </div>
-<div class="chart-wrap">
-    <h3>📈 Pass/Fail Trend (last 50 runs)</h3>
-    <div class="chart-bars" id="trendChart"></div>
-</div>
-<div class="controls">
-    <input class="search-input" type="text" id="searchInput"
-           placeholder="🔍 Search by Run ID, date..."
-           oninput="filterRuns()"/>
-    <button class="filter-btn active"
-            onclick="setFilter('all',this)">All</button>
-    <button class="filter-btn"
-            onclick="setFilter('pass',this)">✅ All Pass</button>
-    <button class="filter-btn"
-            onclick="setFilter('fail',this)">❌ Has Failures</button>
-</div>
-<div class="runs-wrap">
-    <h3>🗂️ All Runs</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Run ID</th>
-                <th>Timestamp</th>
-                <th>Total</th>
-                <th>Passed</th>
-                <th>Failed</th>
-                <th>Skipped</th>
-                <th>Pass Rate</th>
-                <th>Status</th>
-                <th>Detail</th>
-            </tr>
-        </thead>
-      </table></div><div class='pagination' id='pagination'></div></div><div class="lightbox" id="lightbox"
-     onclick="this.classList.remove('active')">
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
     <span class="lightbox-close">✕</span>
     <img id="lightbox-img" src="" alt="screenshot"/>
 </div>
-<footer>
-    MAS Flow Dashboard • 4 total runs •
-    Powered by Appium + TestNG + Cloudinary
+
+<footer id="footerText">
+    MAS Flow Dashboard • Powered by Appium + TestNG + Cloudinary
 </footer>
 
 <script>
 // ===== LOAD DATA FROM history.json =====
-fetch('history.json?t=' + Date.now())  // ?t= prevents caching
-  .then(r => r.json())
+fetch('history.json?t=' + Date.now())
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
   .then(runs => {
+    // remove duplicates by runId
+    const seen = new Set();
+    runs = runs.filter(r => {
+        if (seen.has(r.runId)) return false;
+        seen.add(r.runId);
+        return true;
+    });
     runs.sort((a, b) => b.epochMs - a.epochMs); // newest first
     buildDashboard(runs);
   })
   .catch(err => {
     console.error('Failed to load history.json:', err);
     document.getElementById('runsBody').innerHTML =
-      '<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:20px;">Failed to load data. Make sure history.json exists.</td></tr>';
+      '<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:20px;">❌ Failed to load history.json — ' + err.message + '</td></tr>';
   });
 
 function buildDashboard(runs) {
+    // ===== HEADER =====
+    if (runs.length > 0) {
+        document.getElementById('lastUpdated').textContent =
+            'Last updated: ' + runs[0].timestamp;
+    }
+
     // ===== SUMMARY STATS =====
     const totalRuns   = runs.length;
     const totalTests  = runs.reduce((s, r) => s + r.total,   0);
@@ -258,20 +289,22 @@ function buildDashboard(runs) {
         ? Math.round(runs.reduce((s, r) => s + r.passRate, 0) / totalRuns)
         : 0;
 
-    document.querySelector('.stat-card.runs   .val').textContent = totalRuns;
-    document.querySelector('.stat-card.tests  .val').textContent = totalTests;
-    document.querySelector('.stat-card.passed .val').textContent = totalPassed;
-    document.querySelector('.stat-card.failed .val').textContent = totalFailed;
-    document.querySelector('.stat-card.rate   .val').textContent = avgRate + '%';
+    document.getElementById('statRuns').textContent   = totalRuns;
+    document.getElementById('statTests').textContent  = totalTests;
+    document.getElementById('statPassed').textContent = totalPassed;
+    document.getElementById('statFailed').textContent = totalFailed;
+    document.getElementById('statRate').textContent   = avgRate + '%';
+    document.getElementById('footerText').textContent =
+        'MAS Flow Dashboard • ' + totalRuns + ' total runs • Powered by Appium + TestNG + Cloudinary';
 
     // ===== TREND CHART =====
     const chartEl  = document.getElementById('trendChart');
-    const last50   = runs.slice(-50);
+    const last50   = [...runs].reverse().slice(-50); // chronological order for chart
     const maxTotal = Math.max(...last50.map(d => d.total), 1);
     chartEl.innerHTML = '';
     last50.forEach(d => {
-        const passH = Math.round((d.passed / maxTotal) * 100);
-        const failH = Math.round((d.failed / maxTotal) * 100);
+        const passH = Math.round((d.passed  / maxTotal) * 100);
+        const failH = Math.round((d.failed  / maxTotal) * 100);
         const skipH = Math.round((d.skipped / maxTotal) * 100);
         chartEl.innerHTML += `
             <div class="bar-group">
@@ -288,6 +321,12 @@ function buildDashboard(runs) {
     // ===== BUILD TABLE ROWS =====
     const tbody = document.getElementById('runsBody');
     tbody.innerHTML = '';
+
+    if (runs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:20px;">No runs found.</td></tr>';
+        return;
+    }
+
     runs.forEach((run, idx) => {
         const filter = run.failed > 0 ? 'fail' : 'pass';
         const pill   = run.failed > 0
@@ -296,23 +335,38 @@ function buildDashboard(runs) {
 
         // build test detail rows
         let testsHtml = '';
-        run.tests.forEach(t => {
-            const errHtml = t.errorMessage
-                ? `<div class='test-row-err'>${t.errorMessage.split('\\n')[0]}</div>`
+        (run.tests || []).forEach(t => {
+            const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
+            const errHtml = errMsg
+                ? `<div class="test-row-err">${escHtml(errMsg)}</div>`
                 : '';
+
+            const stackHtml = t.stackTrace
+                ? `<div class="stack-toggle">
+                       <span class="st-label" onclick="toggleStack('stack_${idx}_${t.method}')">
+                           📄 Stack Trace
+                           <span class="stack-arrow" id="arrow_stack_${idx}_${t.method}">▼</span>
+                       </span>
+                   </div>
+                   <div class="stack-box" id="stack_${idx}_${t.method}">${escHtml(t.stackTrace)}</div>`
+                : '';
+
             const shotHtml = t.screenshotUrl
                 ? `<div class="screenshot-thumb">
-                     <div class="shot-label">📸 Failure screenshot</div>
-                     <img src="${t.screenshotUrl}"
-                          onclick="openLightbox('${t.screenshotUrl}')"
-                          onerror="this.parentElement.style.display='none'"/>
-                   </div>` : '';
+                       <div class="shot-label">📸 Failure screenshot</div>
+                       <img src="${t.screenshotUrl}"
+                            onclick="openLightbox('${t.screenshotUrl}')"
+                            onerror="this.parentElement.style.display='none'"/>
+                   </div>`
+                : '';
+
             const icon = t.status === 'passed' ? '✅' : t.status === 'failed' ? '❌' : '⚠️';
             testsHtml += `
                 <div class="test-row ${t.status}">
-                    <div class="test-row-name">${icon} ${t.method}</div>
-                    <div class="test-row-meta">⏱ ${t.duration} ms</div>
+                    <div class="test-row-name">${icon} ${escHtml(t.method)}</div>
+                    <div class="test-row-meta">⏱ ${t.duration} ms &nbsp;|&nbsp; 🕐 ${t.startTime}</div>
                     ${errHtml}
+                    ${stackHtml}
                     ${shotHtml}
                 </div>`;
         });
@@ -347,7 +401,16 @@ function buildDashboard(runs) {
     applyPage();
 }
 
-// ===== Keep all your existing JS functions below =====
+// ===== HELPERS =====
+function escHtml(str) {
+    return (str || '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+}
+
+// ===== PAGINATION =====
 const PAGE_SIZE = 20;
 let currentPage   = 1;
 let currentFilter = 'all';
@@ -379,6 +442,8 @@ function applyPage() {
     });
     renderPagination();
 }
+
+// ===== FILTER & SEARCH =====
 function setFilter(type, btn) {
     currentFilter = type; currentPage = 1;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -391,23 +456,28 @@ function applyFilters() {
     document.querySelectorAll('.run-row').forEach(r => {
         const matchFilter = currentFilter === 'all' || r.dataset.filter === currentFilter;
         const matchSearch = r.dataset.search.toLowerCase().includes(query);
-        r.style.display = (matchFilter && matchSearch) ? '' : 'none';
+        r.style.display   = (matchFilter && matchSearch) ? '' : 'none';
     });
     applyPage();
 }
+
+// ===== EXPAND / COLLAPSE =====
 function toggleDetail(idx) {
     document.getElementById('detail_' + idx).classList.toggle('open');
 }
 function toggleStack(id) {
-    const box = document.getElementById(id);
+    const box   = document.getElementById(id);
     const arrow = document.getElementById('arrow_' + id);
-    if (box) { box.classList.toggle('open'); }
-    if (arrow) { arrow.style.transform = box.classList.contains('open') ? 'rotate(180deg)' : ''; }
+    if (box)   box.classList.toggle('open');
+    if (arrow) arrow.style.transform = box.classList.contains('open') ? 'rotate(180deg)' : '';
 }
+
+// ===== LIGHTBOX =====
 function openLightbox(src) {
     document.getElementById('lightbox-img').src = src;
     document.getElementById('lightbox').classList.add('active');
     event.stopPropagation();
 }
 </script>
-</body></html>
+</body>
+</html>
