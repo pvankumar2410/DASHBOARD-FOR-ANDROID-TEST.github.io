@@ -284,4 +284,4 @@
         "stackTrace": ""
       }
     ]
-  }]
+  },{"runId":"RUN_20260426_215147","timestamp":"26 Apr 2026, 21:51:47","epochMs":1777211507234,"total":1,"passed":1,"failed":0,"skipped":0,"passRate":100,"tests":[{"method":"clickSideMenuButton","className":"Maintest.Maintestclass","status":"passed","duration":4398,"startTime":"21:51:41","errorMessage":"","screenshotUrl":"","stackTrace":""}]}]
