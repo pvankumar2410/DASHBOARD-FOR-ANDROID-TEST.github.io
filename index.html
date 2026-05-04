@@ -109,31 +109,80 @@
     border:1px solid var(--line);
   }
   .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;}
+  .chart-head .left{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
   .chart-head h3{font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);}
+  .chart-meta{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;}
+  .chart-meta strong{color:var(--accent);}
   .legend{display:flex;gap:14px;font-size:11px;color:var(--muted);}
   .legend-item{display:flex;align-items:center;gap:6px;}
   .legend-dot{width:8px;height:8px;border-radius:2px;}
-  .chart-bars{display:flex;align-items:flex-end;gap:5px;height:140px;
-    overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin;scrollbar-color:#2a2a44 transparent;}
+
+  .chart-bars{
+    display:flex;align-items:flex-end;gap:6px;height:200px;
+    overflow-x:auto;padding:18px 4px 8px;
+    scrollbar-width:thin;scrollbar-color:#2a2a44 transparent;
+    position:relative;
+  }
   .chart-bars::-webkit-scrollbar{height:6px;}
   .chart-bars::-webkit-scrollbar-track{background:transparent;}
   .chart-bars::-webkit-scrollbar-thumb{background:#2a2a44;border-radius:3px;}
+
   .bar-group{
     display:flex;flex-direction:column;align-items:center;
-    min-width:36px;gap:4px;cursor:pointer;
-    transition:transform 0.15s ease;
+    min-width:42px;gap:6px;cursor:pointer;flex-shrink:0;
+    height:100%;justify-content:flex-end;position:relative;
   }
-  .bar-group:hover{transform:translateY(-3px);}
-  .bar-tip{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;
-    opacity:0;transition:opacity 0.15s ease;height:12px;}
-  .bar-group:hover .bar-tip{opacity:1;}
-  .bar-stack{display:flex;flex-direction:column;justify-content:flex-end;
-    width:24px;height:100px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,0.03);}
-  .bar-pass{background:linear-gradient(180deg,#22c55e,#16a34a);}
+  .bar-total{
+    font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    font-weight:600;height:14px;line-height:14px;
+    transition:color 0.15s;
+  }
+  .bar-group:hover .bar-total{color:var(--text);}
+  .bar-stack{
+    display:flex;flex-direction:column;
+    width:28px;height:140px;border-radius:4px;overflow:hidden;
+    background:rgba(255,255,255,0.03);
+    transition:transform 0.15s ease,box-shadow 0.15s ease;
+  }
+  .bar-group:hover .bar-stack{
+    transform:translateY(-2px);
+    box-shadow:0 8px 16px -8px rgba(0,0,0,0.5);
+  }
+  /* slices fill from top→bottom in DOM order, so put fail first */
   .bar-fail{background:linear-gradient(180deg,#ef4444,#dc2626);}
   .bar-skip{background:linear-gradient(180deg,#f59e0b,#d97706);}
+  .bar-pass{background:linear-gradient(180deg,#22c55e,#16a34a);}
+
   .bar-label{font-size:9px;color:var(--dim);text-align:center;
     font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+
+  /* custom tooltip */
+  .chart-tooltip{
+    position:fixed;z-index:100;pointer-events:none;
+    background:var(--bg-2);border:1px solid var(--line-2);
+    border-radius:8px;padding:10px 12px;
+    font-size:11px;font-family:'JetBrains Mono',monospace;
+    box-shadow:0 12px 32px -8px rgba(0,0,0,0.6);
+    opacity:0;transform:translateY(4px);
+    transition:opacity 0.12s,transform 0.12s;
+    min-width:180px;
+  }
+  .chart-tooltip.show{opacity:1;transform:translateY(0);}
+  .chart-tooltip .tt-id{color:var(--accent);font-weight:600;margin-bottom:4px;}
+  .chart-tooltip .tt-time{color:var(--muted);font-size:10px;margin-bottom:8px;}
+  .chart-tooltip .tt-row{display:flex;justify-content:space-between;gap:14px;padding:2px 0;}
+  .chart-tooltip .tt-row .lbl{color:var(--muted);}
+  .chart-tooltip .tt-row .val{font-weight:600;}
+  .chart-tooltip .tt-pass .val{color:var(--green);}
+  .chart-tooltip .tt-fail .val{color:var(--red);}
+  .chart-tooltip .tt-skip .val{color:var(--amber);}
+  .chart-tooltip .tt-total{border-top:1px solid var(--line);margin-top:6px;padding-top:6px;}
+  .chart-tooltip .tt-rate{color:var(--text);font-weight:700;}
+
+  .chart-empty{
+    padding:40px 20px;color:var(--dim);text-align:center;
+    font-size:12px;width:100%;
+  }
 
   /* ============== FILTERS ============== */
   .filter-panel{
@@ -527,7 +576,10 @@
   <!-- ============== TREND ============== -->
   <div class="chart-wrap">
     <div class="chart-head">
-      <h3>Pass / Fail / Skip Trend</h3>
+      <div class="left">
+        <h3>Pass / Fail / Skip — % per run</h3>
+        <span class="chart-meta" id="chartMeta">—</span>
+      </div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Passed</div>
         <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Failed</div>
@@ -535,9 +587,10 @@
       </div>
     </div>
     <div class="chart-bars" id="trendChart">
-      <div class="loading">Loading chart...</div>
+      <div class="chart-empty">Loading…</div>
     </div>
   </div>
+  <div class="chart-tooltip" id="chartTooltip"></div>
 
   <!-- ============== FILTERS ============== -->
   <div class="filter-panel">
@@ -708,8 +761,7 @@ fetch('history.json?t=' + Date.now())
     state.allRuns = runs;
     populateMethodFilter(runs);
     renderStats(runs);
-    renderTrend(runs);
-    applyFilters();
+    applyFilters(); // also renders the chart against the (initially unfiltered) set
   })
   .catch(err => {
     console.error('load failed:', err);
@@ -752,25 +804,74 @@ function renderStats(runs){
 
 function renderTrend(runs){
   const el = document.getElementById('trendChart');
-  const last50 = [...runs].reverse().slice(-50);
-  if (!last50.length){ el.innerHTML = '<div class="loading">No data</div>'; return; }
-  const maxTotal = Math.max(...last50.map(d => d.total), 1);
-  el.innerHTML = last50.map(d => {
-    const passH = Math.round((d.passed  / maxTotal) * 100);
-    const failH = Math.round((d.failed  / maxTotal) * 100);
-    const skipH = Math.round((d.skipped / maxTotal) * 100);
+  const meta = document.getElementById('chartMeta');
+
+  // chronological for the chart; cap at 50 most recent so labels stay readable
+  const ordered = [...runs].sort((a,b) => a.epochMs - b.epochMs).slice(-50);
+
+  meta.innerHTML = ordered.length
+    ? `<strong>${ordered.length}</strong> ${ordered.length === 1 ? 'run' : 'runs'}` +
+      (runs.length > 50 ? ` (showing latest 50 of ${runs.length})` : '')
+    : '';
+
+  if (!ordered.length){
+    el.innerHTML = '<div class="chart-empty">No runs match the current filters.</div>';
+    return;
+  }
+
+  el.innerHTML = ordered.map((d, i) => {
+    // percentage of each. If a run somehow has total=0, show empty bar.
+    const t = d.total || 0;
+    const passPct = t ? (d.passed  / t) * 100 : 0;
+    const failPct = t ? (d.failed  / t) * 100 : 0;
+    const skipPct = t ? (d.skipped / t) * 100 : 0;
+
+    // Compact label: HH:MM from "26 Apr 2026, 21:32:11" — easier than full dates
+    // when many bars share the same day. If you prefer dates, swap to .slice(0,6).
+    const m = d.timestamp.match(/(\d{1,2}:\d{2})/);
+    const label = m ? m[1] : d.runId.replace('RUN_','').slice(-6);
+
     return `
-      <div class="bar-group" title="${d.runId} — ${d.passed}P/${d.failed}F/${d.skipped}S"
+      <div class="bar-group" data-idx="${i}"
            onclick="document.getElementById('f-search').value='${d.runId}';applyFilters();">
-        <div class="bar-tip">${d.passed}/${d.total}</div>
+        <div class="bar-total">${t}</div>
         <div class="bar-stack">
-          <div class="bar-fail" style="height:${failH}%"></div>
-          <div class="bar-skip" style="height:${skipH}%"></div>
-          <div class="bar-pass" style="height:${passH}%"></div>
+          <div class="bar-fail" style="height:${failPct}%"></div>
+          <div class="bar-skip" style="height:${skipPct}%"></div>
+          <div class="bar-pass" style="height:${passPct}%"></div>
         </div>
-        <div class="bar-label">${d.runId.replace('RUN_','').slice(0,8)}</div>
+        <div class="bar-label">${label}</div>
       </div>`;
   }).join('');
+
+  // Hover tooltip — build once, attach handlers
+  const tip = document.getElementById('chartTooltip');
+  el.querySelectorAll('.bar-group').forEach(g => {
+    g.addEventListener('mouseenter', e => {
+      const d = ordered[+g.dataset.idx];
+      const passPct = d.total ? Math.round((d.passed  / d.total) * 100) : 0;
+      const failPct = d.total ? Math.round((d.failed  / d.total) * 100) : 0;
+      const skipPct = d.total ? Math.round((d.skipped / d.total) * 100) : 0;
+      tip.innerHTML = `
+        <div class="tt-id">${d.runId}</div>
+        <div class="tt-time">${d.timestamp}</div>
+        <div class="tt-row tt-pass"><span class="lbl">Passed</span><span class="val">${d.passed} · ${passPct}%</span></div>
+        <div class="tt-row tt-fail"><span class="lbl">Failed</span><span class="val">${d.failed} · ${failPct}%</span></div>
+        <div class="tt-row tt-skip"><span class="lbl">Skipped</span><span class="val">${d.skipped} · ${skipPct}%</span></div>
+        <div class="tt-row tt-total"><span class="lbl">Total</span><span class="val tt-rate">${d.total} tests</span></div>`;
+      tip.classList.add('show');
+    });
+    g.addEventListener('mousemove', e => {
+      // Position with offset, then nudge back if it would overflow viewport
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      let x = e.clientX + 14, y = e.clientY + 14;
+      if (x + tw > window.innerWidth - 8)  x = e.clientX - tw - 14;
+      if (y + th > window.innerHeight - 8) y = e.clientY - th - 14;
+      tip.style.left = x + 'px';
+      tip.style.top  = y + 'px';
+    });
+    g.addEventListener('mouseleave', () => tip.classList.remove('show'));
+  });
 }
 
 /* ============================================================
@@ -861,6 +962,8 @@ function applyFilters(){
 
   state.currentPage = 1;
   applySort();
+  // chart reflects the filtered set — chronological order is restored inside renderTrend
+  renderTrend(state.filteredRuns);
 }
 
 function applySort(){
