@@ -1,482 +1,1152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <title>MAS Flow — Test Dashboard</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Segoe UI',sans-serif;
-             background:#0f0f1a;color:#e2e8f0;min-height:100vh;}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MAS Flow — Test Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a14;
+    --bg-2:#11111e;
+    --panel:#171728;
+    --panel-2:#1e1e34;
+    --line:rgba(255,255,255,0.07);
+    --line-2:rgba(255,255,255,0.12);
+    --text:#e6e8f0;
+    --muted:#7a829a;
+    --dim:#535b76;
+    --accent:#7c8cff;
+    --accent-2:#a78bfa;
+    --green:#22c55e;
+    --green-bg:rgba(34,197,94,0.12);
+    --red:#ef4444;
+    --red-bg:rgba(239,68,68,0.12);
+    --amber:#f59e0b;
+    --amber-bg:rgba(245,158,11,0.12);
+    --shadow:0 10px 40px -10px rgba(0,0,0,0.5);
+  }
 
-        header{background:linear-gradient(135deg,#1a1a2e,#16213e);
-               padding:24px 40px;display:flex;justify-content:space-between;
-               align-items:center;border-bottom:1px solid rgba(255,255,255,0.08);}
-        header h1{font-size:22px;font-weight:700;color:white;}
-        header p{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;}
-        .live-badge{background:#22c55e;color:white;padding:4px 12px;
-                    border-radius:20px;font-size:11px;font-weight:700;
-                    animation:pulse 2s infinite;}
-        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+  body{
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%,rgba(124,140,255,0.08),transparent 60%),
+      radial-gradient(800px 500px at -10% 20%,rgba(167,139,250,0.06),transparent 60%);
+  }
+  ::selection{background:rgba(124,140,255,0.35);color:#fff;}
 
-        .container{padding:28px 40px;}
+  /* ============== HEADER ============== */
+  header{
+    padding:22px 36px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--line);
+    backdrop-filter:blur(8px);
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,10,20,0.85);
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg,#7c8cff,#a78bfa);
+    display:grid;place-items:center;font-weight:800;color:#0a0a14;font-size:16px;
+    box-shadow:0 8px 24px -8px rgba(124,140,255,0.6);
+  }
+  header h1{font-size:18px;font-weight:700;letter-spacing:-0.01em;}
+  header h1 .sub{font-weight:500;color:var(--muted);margin-left:6px;}
+  header p{font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+  .live-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);
+    color:var(--green);padding:6px 12px;border-radius:999px;
+    font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
+  }
+  .live-badge .dot{
+    width:6px;height:6px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 0 0 rgba(34,197,94,0.7);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(34,197,94,0.6);}
+    70%{box-shadow:0 0 0 8px rgba(34,197,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+  }
 
-        .summary-grid{display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-            gap:16px;margin-bottom:28px;}
-        .stat-card{background:#1e1e2e;border-radius:12px;padding:20px 24px;
-                   text-align:center;border:1px solid rgba(255,255,255,0.06);}
-        .stat-card .val{font-size:36px;font-weight:700;margin-bottom:4px;}
-        .stat-card .lbl{font-size:12px;color:rgba(255,255,255,0.5);}
-        .stat-card.runs   .val{color:#818cf8;}
-        .stat-card.tests  .val{color:#94a3b8;}
-        .stat-card.passed .val{color:#22c55e;}
-        .stat-card.failed .val{color:#ef4444;}
-        .stat-card.rate   .val{color:#f59e0b;}
+  .container{padding:32px 36px 80px;max-width:1600px;margin:0 auto;}
 
-        .chart-wrap{background:#1e1e2e;border-radius:12px;padding:20px 24px;
-                    margin-bottom:28px;border:1px solid rgba(255,255,255,0.06);}
-        .chart-wrap h3{font-size:14px;font-weight:600;color:#94a3b8;
-                       margin-bottom:16px;}
-        .chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;
-                    overflow-x:auto;padding-bottom:4px;}
-        .bar-group{display:flex;flex-direction:column;align-items:center;
-                   min-width:48px;gap:2px;}
-        .bar-stack{display:flex;flex-direction:column;justify-content:flex-end;
-                   width:32px;height:100px;}
-        .bar-pass{background:#22c55e;border-radius:2px 2px 0 0;}
-        .bar-fail{background:#ef4444;}
-        .bar-skip{background:#f59e0b;border-radius:0 0 2px 2px;}
-        .bar-label{font-size:9px;color:#64748b;text-align:center;
-                   margin-top:4px;white-space:nowrap;}
-        .bar-tip{font-size:9px;color:#94a3b8;text-align:center;}
+  /* ============== STAT CARDS ============== */
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:14px;margin-bottom:24px;
+  }
+  .stat-card{
+    position:relative;background:var(--panel);border-radius:14px;padding:20px 22px;
+    border:1px solid var(--line);overflow:hidden;cursor:pointer;
+    transition:transform 0.15s ease,border-color 0.15s ease;
+  }
+  .stat-card:hover{transform:translateY(-2px);border-color:var(--line-2);}
+  .stat-card::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent,rgba(255,255,255,0.02));
+    pointer-events:none;
+  }
+  .stat-card .lbl{font-size:11px;color:var(--muted);font-weight:600;
+    letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;}
+  .stat-card .val{font-size:34px;font-weight:800;letter-spacing:-0.02em;line-height:1;}
+  .stat-card .delta{font-size:11px;color:var(--muted);margin-top:6px;
+    font-family:'JetBrains Mono',monospace;}
+  .stat-card.runs   .val{background:linear-gradient(135deg,#7c8cff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .stat-card.tests  .val{color:var(--text);}
+  .stat-card.passed .val{color:var(--green);}
+  .stat-card.failed .val{color:var(--red);}
+  .stat-card.rate   .val{color:var(--amber);}
 
-        .controls{display:flex;gap:12px;margin-bottom:20px;
-                  flex-wrap:wrap;align-items:center;}
-        .search-input{flex:1;min-width:200px;padding:10px 16px;
-                      border-radius:8px;border:1px solid rgba(255,255,255,0.1);
-                      background:#1e1e2e;color:white;font-size:13px;}
-        .search-input::placeholder{color:#64748b;}
-        .filter-btn{padding:8px 16px;border-radius:8px;
-                    border:1px solid rgba(255,255,255,0.1);
-                    background:#1e1e2e;color:#94a3b8;
-                    cursor:pointer;font-size:12px;font-weight:600;}
-        .filter-btn.active{background:#818cf8;color:white;
-                           border-color:#818cf8;}
+  /* ============== CHART ============== */
+  .chart-wrap{
+    background:var(--panel);border-radius:14px;padding:22px 24px;margin-bottom:24px;
+    border:1px solid var(--line);
+  }
+  .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;}
+  .chart-head h3{font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--muted);}
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  .legend-dot{width:8px;height:8px;border-radius:2px;}
+  .chart-bars{display:flex;align-items:flex-end;gap:5px;height:140px;
+    overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin;scrollbar-color:#2a2a44 transparent;}
+  .chart-bars::-webkit-scrollbar{height:6px;}
+  .chart-bars::-webkit-scrollbar-track{background:transparent;}
+  .chart-bars::-webkit-scrollbar-thumb{background:#2a2a44;border-radius:3px;}
+  .bar-group{
+    display:flex;flex-direction:column;align-items:center;
+    min-width:36px;gap:4px;cursor:pointer;
+    transition:transform 0.15s ease;
+  }
+  .bar-group:hover{transform:translateY(-3px);}
+  .bar-tip{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    opacity:0;transition:opacity 0.15s ease;height:12px;}
+  .bar-group:hover .bar-tip{opacity:1;}
+  .bar-stack{display:flex;flex-direction:column;justify-content:flex-end;
+    width:24px;height:100px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,0.03);}
+  .bar-pass{background:linear-gradient(180deg,#22c55e,#16a34a);}
+  .bar-fail{background:linear-gradient(180deg,#ef4444,#dc2626);}
+  .bar-skip{background:linear-gradient(180deg,#f59e0b,#d97706);}
+  .bar-label{font-size:9px;color:var(--dim);text-align:center;
+    font-family:'JetBrains Mono',monospace;white-space:nowrap;}
 
-        .runs-wrap{background:#1e1e2e;border-radius:12px;
-                   border:1px solid rgba(255,255,255,0.06);
-                   overflow:hidden;margin-bottom:28px;}
-        .runs-wrap h3{padding:16px 20px;font-size:14px;font-weight:600;
-                      color:#94a3b8;
-                      border-bottom:1px solid rgba(255,255,255,0.06);}
-        table{width:100%;border-collapse:collapse;}
-        th{padding:10px 16px;font-size:11px;font-weight:600;color:#64748b;
-           text-align:left;text-transform:uppercase;
-           border-bottom:1px solid rgba(255,255,255,0.06);}
-        td{padding:12px 16px;font-size:13px;
-           border-bottom:1px solid rgba(255,255,255,0.04);
-           vertical-align:middle;}
-        tr:hover td{background:rgba(255,255,255,0.03);}
-        tr:last-child td{border:none;}
+  /* ============== FILTERS ============== */
+  .filter-panel{
+    background:var(--panel);border-radius:14px;padding:18px 22px;margin-bottom:18px;
+    border:1px solid var(--line);
+  }
+  .filter-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:12px;}
+  .filter-head .title{font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);}
+  .filter-head .reset-btn{
+    background:transparent;border:1px solid var(--line-2);color:var(--muted);
+    padding:6px 14px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;
+    letter-spacing:0.04em;text-transform:uppercase;transition:all 0.15s;
+    font-family:inherit;
+  }
+  .filter-head .reset-btn:hover{color:var(--text);border-color:var(--text);}
 
-        .pill{padding:3px 10px;border-radius:20px;
-              font-size:11px;font-weight:700;}
-        .pill.pass{background:#14532d;color:#22c55e;}
-        .pill.fail{background:#7f1d1d;color:#f87171;}
-        .pill.mix {background:#713f12;color:#fbbf24;}
+  .filter-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;
+    margin-bottom:14px;
+  }
+  .filter-field{display:flex;flex-direction:column;gap:6px;}
+  .filter-field label{font-size:10px;color:var(--dim);font-weight:600;
+    letter-spacing:0.06em;text-transform:uppercase;}
+  .filter-input,.filter-select{
+    padding:9px 12px;border-radius:8px;border:1px solid var(--line-2);
+    background:var(--bg-2);color:var(--text);font-size:12px;
+    font-family:inherit;outline:none;transition:border-color 0.15s;
+  }
+  .filter-input:focus,.filter-select:focus{border-color:var(--accent);}
+  .filter-input::placeholder{color:var(--dim);}
+  .filter-select{cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%237a829a' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;
+    padding-right:30px;}
+  .range-row{display:flex;gap:6px;align-items:center;}
+  .range-row .filter-input{flex:1;min-width:0;}
+  .range-row .sep{color:var(--dim);font-size:11px;}
 
-        .pass-rate-bar{height:6px;background:#374151;border-radius:3px;
-                       overflow:hidden;margin-top:4px;width:80px;}
-        .pass-rate-fill{height:100%;border-radius:3px;background:#22c55e;}
+  .filter-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .chip{
+    padding:7px 14px;border-radius:999px;font-size:11px;font-weight:600;
+    letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;
+    border:1px solid var(--line-2);background:var(--bg-2);color:var(--muted);
+    transition:all 0.15s;font-family:inherit;
+  }
+  .chip:hover{color:var(--text);border-color:var(--text);}
+  .chip.active{
+    background:linear-gradient(135deg,#7c8cff,#a78bfa);
+    border-color:transparent;color:#0a0a14;
+  }
+  .chip.green.active{background:var(--green);color:#0a0a14;}
+  .chip.red.active{background:var(--red);color:#0a0a14;}
+  .chip.amber.active{background:var(--amber);color:#0a0a14;}
 
-        .expand-btn{background:#2d2d44;border:none;color:#818cf8;
-                    padding:5px 12px;border-radius:6px;cursor:pointer;
-                    font-size:11px;font-weight:600;}
-        .expand-btn:hover{background:#3d3d5c;}
+  .results-meta{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:12px;padding:0 4px;font-size:12px;color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .results-meta .count strong{color:var(--accent);}
+  .sort-row{display:flex;gap:8px;align-items:center;}
+  .sort-row select{
+    padding:6px 10px;border-radius:6px;border:1px solid var(--line-2);
+    background:var(--bg-2);color:var(--text);font-size:11px;font-family:inherit;
+    cursor:pointer;
+  }
 
-        .run-detail{display:none;background:#161625;}
-        .run-detail.open{display:table-row;}
-        .run-detail td{padding:0;}
-        .detail-inner{padding:16px 20px;}
-        .detail-grid{display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-            gap:10px;}
+  /* ============== RUNS TABLE ============== */
+  .runs-wrap{
+    background:var(--panel);border-radius:14px;border:1px solid var(--line);
+    overflow:hidden;margin-bottom:24px;
+  }
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    padding:14px 18px;font-size:10px;font-weight:700;color:var(--muted);
+    text-align:left;letter-spacing:0.08em;text-transform:uppercase;
+    border-bottom:1px solid var(--line);position:sticky;top:0;
+    background:var(--panel);user-select:none;cursor:pointer;
+  }
+  thead th.sortable:hover{color:var(--text);}
+  thead th .sort-ind{display:inline-block;margin-left:6px;color:var(--dim);font-size:9px;}
+  thead th.sort-asc .sort-ind,thead th.sort-desc .sort-ind{color:var(--accent);}
+  td{padding:14px 18px;font-size:13px;
+    border-bottom:1px solid var(--line);vertical-align:middle;}
+  tr.run-row{transition:background 0.1s;}
+  tr.run-row:hover td{background:rgba(124,140,255,0.04);}
+  tr:last-child td{border:none;}
 
-        .test-row{background:#1e1e2e;border-radius:8px;padding:12px 16px;
-                  border-left:3px solid #374151;font-size:12px;}
-        .test-row.passed {border-left-color:#22c55e;}
-        .test-row.failed {border-left-color:#ef4444;}
-        .test-row.skipped{border-left-color:#f59e0b;}
-        .test-row-name{font-weight:600;margin-bottom:4px;color:#e2e8f0;}
-        .test-row-meta{color:#64748b;font-size:11px;}
-        .test-row-err{color:#f87171;font-size:11px;margin-top:6px;
-                      background:#2d1515;padding:6px 8px;border-radius:4px;}
+  .run-id{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);
+    font-weight:500;
+  }
+  .pill{
+    padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;
+    letter-spacing:0.06em;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  .pill.pass{background:var(--green-bg);color:var(--green);}
+  .pill.fail{background:var(--red-bg);color:var(--red);}
+  .pill.mix {background:var(--amber-bg);color:var(--amber);}
+  .pill.skip{background:rgba(122,130,154,0.15);color:var(--muted);}
 
-        .stack-toggle{margin-top:8px;font-size:11px;color:#818cf8;
-                      cursor:pointer;user-select:none;display:flex;
-                      align-items:center;gap:8px;}
-        .stack-toggle:hover .st-label{text-decoration:underline;}
-        .stack-arrow{font-size:10px;display:inline-block;
-                     transition:transform 0.2s;}
-        .stack-box{display:none;margin-top:6px;background:#0f0f1a;
-                   border-radius:6px;padding:10px 12px;
-                   font-family:'Courier New',monospace;font-size:11px;
-                   white-space:pre-wrap;word-break:break-word;
-                   max-height:200px;overflow-y:auto;
-                   border:1px solid rgba(255,255,255,0.08);}
-        .stack-box.open{display:block;}
-        .st-cause{color:#f38ba8;font-weight:bold;display:block;}
-        .st-own  {color:#a6e3a1;display:block;}
-        .st-lib  {color:#89b4fa;display:block;}
-        .dl-btn  {font-size:10px;color:#64748b;background:#1e1e2e;
-                  border:1px solid rgba(255,255,255,0.1);border-radius:4px;
-                  padding:2px 8px;cursor:pointer;white-space:nowrap;}
-        .dl-btn:hover{color:#e2e8f0;border-color:rgba(255,255,255,0.3);}
+  .num{font-family:'JetBrains Mono',monospace;font-weight:600;}
+  .num.green{color:var(--green);}
+  .num.red{color:var(--red);}
+  .num.amber{color:var(--amber);}
+  .num.muted{color:var(--dim);}
 
-        .screenshot-thumb{margin-top:10px;}
-        .screenshot-thumb img{width:100%;max-width:260px;
-                              border-radius:6px;border:2px solid #ef4444;
-                              cursor:pointer;display:block;
-                              transition:transform 0.2s;}
-        .screenshot-thumb img:hover{transform:scale(1.02);}
-        .screenshot-thumb .shot-label{font-size:10px;color:#64748b;
-                                       margin-bottom:4px;}
+  .pass-rate-cell{display:flex;align-items:center;gap:10px;}
+  .pass-rate-bar{height:5px;background:rgba(255,255,255,0.05);border-radius:3px;
+    overflow:hidden;width:80px;}
+  .pass-rate-fill{height:100%;border-radius:3px;
+    background:linear-gradient(90deg,var(--green),#16a34a);
+    transition:width 0.3s;}
+  .pass-rate-fill.low{background:linear-gradient(90deg,var(--red),#b91c1c);}
+  .pass-rate-fill.mid{background:linear-gradient(90deg,var(--amber),#b45309);}
+  .pass-rate-text{font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--muted);min-width:34px;}
 
-        .lightbox{display:none;position:fixed;top:0;left:0;
-                  width:100%;height:100%;background:rgba(0,0,0,0.9);
-                  z-index:999;justify-content:center;align-items:center;}
-        .lightbox.active{display:flex;}
-        .lightbox img{max-width:90%;max-height:85%;border-radius:8px;}
-        .lightbox-close{position:fixed;top:20px;right:30px;
-                        color:white;font-size:36px;cursor:pointer;}
+  .expand-btn{
+    background:rgba(124,140,255,0.1);border:1px solid rgba(124,140,255,0.2);
+    color:var(--accent);padding:6px 12px;border-radius:7px;cursor:pointer;
+    font-size:11px;font-weight:600;font-family:inherit;
+    display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;
+  }
+  .expand-btn:hover{background:rgba(124,140,255,0.18);}
+  .expand-btn .arrow{transition:transform 0.2s;font-size:9px;}
+  .expand-btn.open .arrow{transform:rotate(180deg);}
 
-        .pagination{display:flex;justify-content:center;
-                    gap:8px;margin-top:16px;flex-wrap:wrap;}
-        .page-btn{padding:6px 14px;border-radius:6px;
-                  border:1px solid rgba(255,255,255,0.1);
-                  background:#1e1e2e;color:#94a3b8;
-                  cursor:pointer;font-size:12px;}
-        .page-btn.active{background:#818cf8;color:white;border-color:#818cf8;}
-        .page-btn:hover:not(.active){background:#2d2d44;}
+  .run-detail{display:none;background:var(--bg-2);}
+  .run-detail.open{display:table-row;}
+  .run-detail td{padding:0;}
+  .detail-inner{padding:18px 22px;}
+  .detail-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:12px;
+  }
 
-        .loading{text-align:center;padding:40px;color:#64748b;font-size:14px;}
+  .test-row{
+    background:var(--panel);border-radius:10px;padding:14px 16px;
+    border-left:3px solid var(--dim);font-size:12px;
+    transition:transform 0.1s;
+  }
+  .test-row:hover{transform:translateX(2px);}
+  .test-row.passed {border-left-color:var(--green);}
+  .test-row.failed {border-left-color:var(--red);}
+  .test-row.skipped{border-left-color:var(--amber);}
+  .test-row-name{font-weight:600;margin-bottom:6px;color:var(--text);
+    display:flex;align-items:center;gap:6px;}
+  .test-row-meta{color:var(--dim);font-size:10px;
+    font-family:'JetBrains Mono',monospace;}
+  .test-row-err{color:#fca5a5;font-size:11px;margin-top:8px;
+    background:rgba(239,68,68,0.08);padding:8px 10px;border-radius:6px;
+    border-left:2px solid var(--red);}
 
-        footer{text-align:center;padding:20px;font-size:11px;
-               color:rgba(255,255,255,0.3);}
-    </style>
+  .stack-toggle{margin-top:8px;font-size:10px;color:var(--accent);
+    cursor:pointer;user-select:none;display:inline-flex;
+    align-items:center;gap:6px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+  .stack-toggle:hover{color:var(--accent-2);}
+  .stack-arrow{font-size:9px;transition:transform 0.2s;}
+  .stack-toggle.open .stack-arrow{transform:rotate(180deg);}
+  .stack-box{display:none;margin-top:8px;background:var(--bg);
+    border-radius:6px;padding:10px 12px;
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    white-space:pre-wrap;word-break:break-word;
+    max-height:240px;overflow-y:auto;
+    border:1px solid var(--line);color:var(--muted);}
+  .stack-box.open{display:block;}
+
+  .screenshot-thumb{margin-top:12px;}
+  .screenshot-thumb-label{font-size:10px;color:var(--dim);margin-bottom:6px;
+    letter-spacing:0.04em;text-transform:uppercase;font-weight:600;
+    display:flex;align-items:center;gap:6px;}
+  .screenshot-thumb img{
+    width:100%;max-width:280px;border-radius:8px;
+    border:1px solid var(--line-2);
+    cursor:zoom-in;display:block;
+    transition:all 0.2s;
+  }
+  .screenshot-thumb img:hover{
+    transform:scale(1.015);border-color:var(--accent);
+    box-shadow:0 8px 24px -8px rgba(124,140,255,0.4);
+  }
+
+  /* ============== LIGHTBOX ============== */
+  .lightbox{
+    display:none;position:fixed;inset:0;
+    background:rgba(5,5,12,0.95);backdrop-filter:blur(8px);
+    z-index:1000;flex-direction:column;
+  }
+  .lightbox.active{display:flex;}
+  .lightbox-toolbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 24px;border-bottom:1px solid rgba(255,255,255,0.08);
+    background:rgba(0,0,0,0.4);
+  }
+  .lightbox-info{display:flex;flex-direction:column;gap:2px;}
+  .lightbox-title{font-size:14px;font-weight:600;color:#fff;}
+  .lightbox-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .lightbox-counter{font-size:11px;color:var(--muted);
+    font-family:'JetBrains Mono',monospace;}
+  .lightbox-actions{display:flex;gap:8px;align-items:center;}
+  .lb-btn{
+    width:36px;height:36px;border-radius:8px;border:1px solid var(--line-2);
+    background:rgba(255,255,255,0.04);color:var(--text);cursor:pointer;
+    display:grid;place-items:center;transition:all 0.15s;font-size:14px;
+  }
+  .lb-btn:hover{background:rgba(255,255,255,0.1);border-color:var(--text);}
+  .lb-btn:disabled{opacity:0.3;cursor:not-allowed;}
+  .lb-zoom-text{font-size:11px;color:var(--muted);
+    font-family:'JetBrains Mono',monospace;min-width:50px;text-align:center;}
+
+  .lightbox-stage{
+    flex:1;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    cursor:grab;
+  }
+  .lightbox-stage.grabbing{cursor:grabbing;}
+  .lightbox-stage img{
+    max-width:90%;max-height:90%;border-radius:6px;
+    transform-origin:center;transition:transform 0.15s ease-out;
+    user-select:none;-webkit-user-drag:none;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,0.8);
+  }
+  .lightbox-stage.zoomed img{transition:none;}
+  .lb-nav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:48px;height:48px;border-radius:50%;
+    background:rgba(0,0,0,0.5);border:1px solid var(--line-2);color:#fff;
+    cursor:pointer;display:grid;place-items:center;font-size:18px;
+    transition:all 0.15s;backdrop-filter:blur(4px);
+  }
+  .lb-nav:hover{background:rgba(255,255,255,0.1);}
+  .lb-nav.prev{left:24px;}
+  .lb-nav.next{right:24px;}
+  .lb-hint{
+    position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+    font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    background:rgba(0,0,0,0.5);padding:6px 14px;border-radius:999px;
+    border:1px solid var(--line);
+  }
+
+  /* ============== PAGINATION ============== */
+  .pagination{display:flex;justify-content:center;
+    gap:6px;flex-wrap:wrap;}
+  .page-btn{
+    min-width:36px;height:36px;padding:0 12px;border-radius:8px;
+    border:1px solid var(--line-2);background:var(--panel);color:var(--muted);
+    cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;
+    transition:all 0.15s;
+  }
+  .page-btn.active{background:linear-gradient(135deg,#7c8cff,#a78bfa);
+    color:#0a0a14;border-color:transparent;}
+  .page-btn:hover:not(.active):not(:disabled){background:var(--panel-2);color:var(--text);}
+  .page-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--muted);
+  }
+  .empty-state .big{font-size:48px;margin-bottom:12px;opacity:0.4;}
+  .empty-state .msg{font-size:14px;}
+  .empty-state .hint{font-size:12px;color:var(--dim);margin-top:6px;}
+
+  .loading{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+
+  footer{text-align:center;padding:30px 20px;font-size:11px;
+    color:var(--dim);font-family:'JetBrains Mono',monospace;
+    border-top:1px solid var(--line);margin-top:40px;}
+
+  /* responsive */
+  @media (max-width:768px){
+    .container{padding:20px 16px 60px;}
+    header{padding:18px 16px;}
+    thead th,td{padding:10px 12px;font-size:11px;}
+    .stat-card{padding:16px;}
+    .stat-card .val{font-size:26px;}
+    .lb-nav{width:40px;height:40px;}
+    .lb-nav.prev{left:8px;}
+    .lb-nav.next{right:8px;}
+  }
+</style>
 </head>
 <body>
+
 <header>
+  <div class="brand">
+    <div class="brand-mark">M</div>
     <div>
-        <h1>🧪 MAS Flow — Test Dashboard</h1>
-        <p id="lastUpdated">Loading...</p>
+      <h1>MAS Flow <span class="sub">Test Dashboard</span></h1>
+      <p id="lastUpdated">Loading...</p>
     </div>
-    <span class="live-badge">● LIVE</span>
+  </div>
+  <span class="live-badge"><span class="dot"></span>Live</span>
 </header>
 
 <div class="container">
-    <div class="summary-grid">
-        <div class="stat-card runs">
-            <div class="val" id="statRuns">—</div>
-            <div class="lbl">Total Runs</div>
-        </div>
-        <div class="stat-card tests">
-            <div class="val" id="statTests">—</div>
-            <div class="lbl">Total Tests</div>
-        </div>
-        <div class="stat-card passed">
-            <div class="val" id="statPassed">—</div>
-            <div class="lbl">Total Passed</div>
-        </div>
-        <div class="stat-card failed">
-            <div class="val" id="statFailed">—</div>
-            <div class="lbl">Total Failed</div>
-        </div>
-        <div class="stat-card rate">
-            <div class="val" id="statRate">—</div>
-            <div class="lbl">Avg Pass Rate</div>
-        </div>
+
+  <!-- ============== STATS ============== -->
+  <div class="summary-grid">
+    <div class="stat-card runs"   data-stat="all">
+      <div class="lbl">Total Runs</div>
+      <div class="val" id="statRuns">—</div>
+      <div class="delta" id="deltaRuns">—</div>
+    </div>
+    <div class="stat-card tests"  data-stat="all">
+      <div class="lbl">Total Tests</div>
+      <div class="val" id="statTests">—</div>
+      <div class="delta" id="deltaTests">—</div>
+    </div>
+    <div class="stat-card passed" data-stat="pass">
+      <div class="lbl">Passed</div>
+      <div class="val" id="statPassed">—</div>
+      <div class="delta" id="deltaPassed">click to filter</div>
+    </div>
+    <div class="stat-card failed" data-stat="fail">
+      <div class="lbl">Failed</div>
+      <div class="val" id="statFailed">—</div>
+      <div class="delta" id="deltaFailed">click to filter</div>
+    </div>
+    <div class="stat-card rate">
+      <div class="lbl">Avg Pass Rate</div>
+      <div class="val" id="statRate">—</div>
+      <div class="delta" id="deltaRate">—</div>
+    </div>
+  </div>
+
+  <!-- ============== TREND ============== -->
+  <div class="chart-wrap">
+    <div class="chart-head">
+      <h3>Pass / Fail / Skip Trend</h3>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Passed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Failed</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Skipped</div>
+      </div>
+    </div>
+    <div class="chart-bars" id="trendChart">
+      <div class="loading">Loading chart...</div>
+    </div>
+  </div>
+
+  <!-- ============== FILTERS ============== -->
+  <div class="filter-panel">
+    <div class="filter-head">
+      <span class="title">Filters</span>
+      <button class="reset-btn" onclick="resetFilters()">↻ Reset all</button>
     </div>
 
-    <div class="chart-wrap">
-        <h3>📈 Pass/Fail Trend (last 50 runs)</h3>
-        <div class="chart-bars" id="trendChart">
-            <div class="loading">Loading chart...</div>
+    <div class="filter-grid">
+      <div class="filter-field">
+        <label>Search</label>
+        <input class="filter-input" id="f-search" type="text"
+               placeholder="Run ID, timestamp, test method, error..."
+               oninput="applyFilters()"/>
+      </div>
+
+      <div class="filter-field">
+        <label>Date range</label>
+        <div class="range-row">
+          <input class="filter-input" id="f-date-from" type="date" onchange="applyFilters()"/>
+          <span class="sep">→</span>
+          <input class="filter-input" id="f-date-to"   type="date" onchange="applyFilters()"/>
         </div>
+      </div>
+
+      <div class="filter-field">
+        <label>Test method</label>
+        <select class="filter-select" id="f-method" onchange="applyFilters()">
+          <option value="">All methods</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Pass rate (%)</label>
+        <div class="range-row">
+          <input class="filter-input" id="f-rate-min" type="number" min="0" max="100" placeholder="min" oninput="applyFilters()"/>
+          <span class="sep">—</span>
+          <input class="filter-input" id="f-rate-max" type="number" min="0" max="100" placeholder="max" oninput="applyFilters()"/>
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label>Total tests</label>
+        <div class="range-row">
+          <input class="filter-input" id="f-total-min" type="number" min="0" placeholder="min" oninput="applyFilters()"/>
+          <span class="sep">—</span>
+          <input class="filter-input" id="f-total-max" type="number" min="0" placeholder="max" oninput="applyFilters()"/>
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label>Has screenshots</label>
+        <select class="filter-select" id="f-screenshots" onchange="applyFilters()">
+          <option value="any">Any</option>
+          <option value="yes">With screenshots</option>
+          <option value="no">Without screenshots</option>
+        </select>
+      </div>
     </div>
 
-    <div class="controls">
-        <input class="search-input" type="text" id="searchInput"
-               placeholder="🔍 Search by Run ID, date..."
-               oninput="filterRuns()"/>
-        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-        <button class="filter-btn" onclick="setFilter('pass',this)">✅ All Pass</button>
-        <button class="filter-btn" onclick="setFilter('fail',this)">❌ Has Failures</button>
+    <div class="filter-chips" id="statusChips">
+      <span style="font-size:10px;color:var(--dim);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-right:4px;">Status:</span>
+      <button class="chip active" data-status="all"  onclick="setStatus('all',this)">All</button>
+      <button class="chip green"  data-status="pass" onclick="setStatus('pass',this)">✓ All Pass</button>
+      <button class="chip red"    data-status="fail" onclick="setStatus('fail',this)">✗ Has Failures</button>
+      <button class="chip amber"  data-status="skip" onclick="setStatus('skip',this)">⏭ Has Skipped</button>
     </div>
+  </div>
 
-    <div class="runs-wrap">
-        <h3>🗂️ All Runs</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Run ID</th>
-                    <th>Timestamp</th>
-                    <th>Total</th>
-                    <th>Passed</th>
-                    <th>Failed</th>
-                    <th>Skipped</th>
-                    <th>Pass Rate</th>
-                    <th>Status</th>
-                    <th>Detail</th>
-                </tr>
-            </thead>
-            <tbody id="runsBody">
-                <tr><td colspan="9" class="loading">⏳ Loading runs...</td></tr>
-            </tbody>
-        </table>
+  <!-- ============== RESULTS META ============== -->
+  <div class="results-meta">
+    <div class="count">Showing <strong id="resultCount">0</strong> of <span id="totalCount">0</span> runs</div>
+    <div class="sort-row">
+      <span style="color:var(--dim);">Sort:</span>
+      <select id="sortBy" onchange="applySort()">
+        <option value="time-desc">Newest first</option>
+        <option value="time-asc">Oldest first</option>
+        <option value="rate-desc">Pass rate ↓</option>
+        <option value="rate-asc">Pass rate ↑</option>
+        <option value="failed-desc">Most failures</option>
+        <option value="total-desc">Most tests</option>
+      </select>
     </div>
+  </div>
 
-    <div class="pagination" id="pagination"></div>
+  <!-- ============== RUNS TABLE ============== -->
+  <div class="runs-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sortable" onclick="sortByCol('runId')">Run ID<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('time')">Timestamp<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('total')">Total<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('passed')">Passed<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('failed')">Failed<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('skipped')">Skipped<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('rate')">Pass Rate<span class="sort-ind">⇅</span></th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="runsBody">
+        <tr><td colspan="9" class="loading">⏳ Loading runs...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
-    <span class="lightbox-close">✕</span>
-    <img id="lightbox-img" src="" alt="screenshot"/>
+<!-- ============== LIGHTBOX ============== -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-toolbar">
+    <div class="lightbox-info">
+      <span class="lightbox-title" id="lbTitle">Screenshot</span>
+      <span class="lightbox-meta" id="lbMeta"></span>
+    </div>
+    <div class="lightbox-actions">
+      <span class="lightbox-counter" id="lbCounter"></span>
+      <button class="lb-btn" id="lbZoomOut" title="Zoom out (−)">−</button>
+      <span class="lb-zoom-text" id="lbZoomText">100%</span>
+      <button class="lb-btn" id="lbZoomIn"  title="Zoom in (+)">+</button>
+      <button class="lb-btn" id="lbReset"   title="Reset (0)">⟲</button>
+      <button class="lb-btn" id="lbDownload" title="Download (D)">↓</button>
+      <button class="lb-btn" id="lbOpen"    title="Open in new tab">↗</button>
+      <button class="lb-btn" id="lbClose"   title="Close (Esc)">✕</button>
+    </div>
+  </div>
+  <div class="lightbox-stage" id="lbStage">
+    <button class="lb-nav prev" id="lbPrev" title="Previous (←)">‹</button>
+    <img id="lbImg" src="" alt="screenshot"/>
+    <button class="lb-nav next" id="lbNext" title="Next (→)">›</button>
+    <div class="lb-hint">← → navigate · scroll to zoom · drag to pan · esc to close</div>
+  </div>
 </div>
 
-<footer id="footerText">
-Automation Report
-</footer>
+<footer id="footerText">MAS Flow Dashboard</footer>
 
 <script>
-// ===== LOAD DATA FROM history.json =====
+/* ============================================================
+ *  STATE
+ * ============================================================ */
+const state = {
+  allRuns:       [],   // raw, deduped, sorted newest-first
+  filteredRuns:  [],   // after filters
+  sortKey:       'time',
+  sortDir:       'desc',
+  currentPage:   1,
+  pageSize:      20,
+  status:        'all',
+  // lightbox
+  lbList:        [],   // [{url, runId, method, timestamp}]
+  lbIndex:       0,
+  lbZoom:        1,
+  lbPanX:        0,
+  lbPanY:        0,
+};
+
+/* ============================================================
+ *  LOAD
+ * ============================================================ */
 fetch('history.json?t=' + Date.now())
-  .then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  })
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(runs => {
-    // remove duplicates by runId
     const seen = new Set();
-    runs = runs.filter(r => {
-        if (seen.has(r.runId)) return false;
-        seen.add(r.runId);
-        return true;
-    });
-    runs.sort((a, b) => b.epochMs - a.epochMs); // newest first
-    buildDashboard(runs);
+    runs = runs.filter(r => seen.has(r.runId) ? false : (seen.add(r.runId), true));
+    runs.sort((a,b) => b.epochMs - a.epochMs);
+    state.allRuns = runs;
+    populateMethodFilter(runs);
+    renderStats(runs);
+    renderTrend(runs);
+    applyFilters();
   })
   .catch(err => {
-    console.error('Failed to load history.json:', err);
+    console.error('load failed:', err);
     document.getElementById('runsBody').innerHTML =
-      '<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:20px;">❌ Failed to load history.json — ' + err.message + '</td></tr>';
+      `<tr><td colspan="9" class="empty-state">
+        <div class="big">⚠️</div>
+        <div class="msg">Failed to load history.json</div>
+        <div class="hint">${escHtml(err.message)}</div>
+      </td></tr>`;
   });
 
-function buildDashboard(runs) {
-    // ===== HEADER =====
-    if (runs.length > 0) {
-        document.getElementById('lastUpdated').textContent =
-            'Last updated: ' + runs[0].timestamp;
+/* ============================================================
+ *  STATS  +  TREND
+ * ============================================================ */
+function renderStats(runs){
+  const totalRuns   = runs.length;
+  const totalTests  = runs.reduce((s,r) => s + r.total,   0);
+  const totalPassed = runs.reduce((s,r) => s + r.passed,  0);
+  const totalFailed = runs.reduce((s,r) => s + r.failed,  0);
+  const avgRate     = totalRuns ? Math.round(runs.reduce((s,r) => s + r.passRate, 0) / totalRuns) : 0;
+
+  document.getElementById('statRuns').textContent   = totalRuns;
+  document.getElementById('statTests').textContent  = totalTests;
+  document.getElementById('statPassed').textContent = totalPassed;
+  document.getElementById('statFailed').textContent = totalFailed;
+  document.getElementById('statRate').textContent   = avgRate + '%';
+  document.getElementById('lastUpdated').textContent =
+    runs.length ? 'Last run · ' + runs[0].timestamp : '—';
+  document.getElementById('footerText').textContent =
+    `MAS Flow Dashboard · ${totalRuns} runs · ${totalTests} tests · powered by Appium + TestNG`;
+
+  // little context lines
+  const failedRuns = runs.filter(r => r.failed > 0).length;
+  const cleanRuns  = runs.filter(r => r.failed === 0 && r.skipped === 0).length;
+  document.getElementById('deltaRuns').textContent   = `${cleanRuns} clean · ${failedRuns} with issues`;
+  document.getElementById('deltaTests').textContent  = `${totalPassed + totalFailed} executed`;
+  document.getElementById('deltaRate').textContent   =
+    avgRate >= 80 ? 'healthy' : avgRate >= 50 ? 'needs attention' : 'critical';
+}
+
+function renderTrend(runs){
+  const el = document.getElementById('trendChart');
+  const last50 = [...runs].reverse().slice(-50);
+  if (!last50.length){ el.innerHTML = '<div class="loading">No data</div>'; return; }
+  const maxTotal = Math.max(...last50.map(d => d.total), 1);
+  el.innerHTML = last50.map(d => {
+    const passH = Math.round((d.passed  / maxTotal) * 100);
+    const failH = Math.round((d.failed  / maxTotal) * 100);
+    const skipH = Math.round((d.skipped / maxTotal) * 100);
+    return `
+      <div class="bar-group" title="${d.runId} — ${d.passed}P/${d.failed}F/${d.skipped}S"
+           onclick="document.getElementById('f-search').value='${d.runId}';applyFilters();">
+        <div class="bar-tip">${d.passed}/${d.total}</div>
+        <div class="bar-stack">
+          <div class="bar-fail" style="height:${failH}%"></div>
+          <div class="bar-skip" style="height:${skipH}%"></div>
+          <div class="bar-pass" style="height:${passH}%"></div>
+        </div>
+        <div class="bar-label">${d.runId.replace('RUN_','').slice(0,8)}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ============================================================
+ *  FILTER BUILDERS
+ * ============================================================ */
+function populateMethodFilter(runs){
+  const methods = new Set();
+  runs.forEach(r => (r.tests || []).forEach(t => methods.add(t.method)));
+  const sel = document.getElementById('f-method');
+  [...methods].sort().forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m;
+    sel.appendChild(opt);
+  });
+}
+
+/* ============================================================
+ *  FILTERS  +  SORT
+ * ============================================================ */
+function setStatus(s, btn){
+  state.status = s;
+  document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function resetFilters(){
+  ['f-search','f-date-from','f-date-to','f-rate-min','f-rate-max',
+   'f-total-min','f-total-max'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-method').value = '';
+  document.getElementById('f-screenshots').value = 'any';
+  document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#statusChips .chip[data-status="all"]').classList.add('active');
+  state.status = 'all';
+  state.currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters(){
+  const q       = document.getElementById('f-search').value.toLowerCase().trim();
+  const dateFr  = document.getElementById('f-date-from').value;
+  const dateTo  = document.getElementById('f-date-to').value;
+  const method  = document.getElementById('f-method').value;
+  const rateMin = numOrNull(document.getElementById('f-rate-min').value);
+  const rateMax = numOrNull(document.getElementById('f-rate-max').value);
+  const totMin  = numOrNull(document.getElementById('f-total-min').value);
+  const totMax  = numOrNull(document.getElementById('f-total-max').value);
+  const shotsF  = document.getElementById('f-screenshots').value;
+
+  const dateFrMs = dateFr ? new Date(dateFr + 'T00:00:00').getTime() : null;
+  const dateToMs = dateTo ? new Date(dateTo + 'T23:59:59').getTime() : null;
+
+  state.filteredRuns = state.allRuns.filter(r => {
+    // status
+    if (state.status === 'pass' && r.failed > 0)              return false;
+    if (state.status === 'fail' && r.failed === 0)            return false;
+    if (state.status === 'skip' && r.skipped === 0)           return false;
+
+    // date
+    if (dateFrMs !== null && r.epochMs < dateFrMs)            return false;
+    if (dateToMs !== null && r.epochMs > dateToMs)            return false;
+
+    // pass rate
+    if (rateMin !== null && r.passRate < rateMin)             return false;
+    if (rateMax !== null && r.passRate > rateMax)             return false;
+
+    // total
+    if (totMin !== null && r.total < totMin)                  return false;
+    if (totMax !== null && r.total > totMax)                  return false;
+
+    // method
+    if (method && !(r.tests || []).some(t => t.method === method)) return false;
+
+    // screenshots
+    const hasShots = (r.tests || []).some(t => t.screenshotUrl);
+    if (shotsF === 'yes' && !hasShots)                        return false;
+    if (shotsF === 'no'  &&  hasShots)                        return false;
+
+    // text search — runId, timestamp, methods, error messages
+    if (q){
+      const hay = (r.runId + ' ' + r.timestamp + ' ' +
+        (r.tests || []).map(t => t.method + ' ' + (t.errorMessage||'')).join(' ')
+      ).toLowerCase();
+      if (!hay.includes(q)) return false;
     }
+    return true;
+  });
 
-    // ===== SUMMARY STATS =====
-    const totalRuns   = runs.length;
-    const totalTests  = runs.reduce((s, r) => s + r.total,   0);
-    const totalPassed = runs.reduce((s, r) => s + r.passed,  0);
-    const totalFailed = runs.reduce((s, r) => s + r.failed,  0);
-    const avgRate     = totalRuns > 0
-        ? Math.round(runs.reduce((s, r) => s + r.passRate, 0) / totalRuns)
-        : 0;
+  state.currentPage = 1;
+  applySort();
+}
 
-    document.getElementById('statRuns').textContent   = totalRuns;
-    document.getElementById('statTests').textContent  = totalTests;
-    document.getElementById('statPassed').textContent = totalPassed;
-    document.getElementById('statFailed').textContent = totalFailed;
-    document.getElementById('statRate').textContent   = avgRate + '%';
-    document.getElementById('footerText').textContent =
-        'MAS Flow Dashboard • ' + totalRuns + ' total runs • Powered by Appium + TestNG + Cloudinary';
+function applySort(){
+  const sortVal = document.getElementById('sortBy').value;
+  const [key, dir] = sortVal.split('-');
+  state.sortKey = key; state.sortDir = dir;
+  doSort();
+  renderTable();
+}
 
-    // ===== TREND CHART =====
-    const chartEl  = document.getElementById('trendChart');
-    const last50   = [...runs].reverse().slice(-50); // chronological order for chart
-    const maxTotal = Math.max(...last50.map(d => d.total), 1);
-    chartEl.innerHTML = '';
-    last50.forEach(d => {
-        const passH = Math.round((d.passed  / maxTotal) * 100);
-        const failH = Math.round((d.failed  / maxTotal) * 100);
-        const skipH = Math.round((d.skipped / maxTotal) * 100);
-        chartEl.innerHTML += `
-            <div class="bar-group">
-                <div class="bar-tip">${d.passed}/${d.total}</div>
-                <div class="bar-stack">
-                    <div class="bar-fail" style="height:${failH}px"></div>
-                    <div class="bar-skip" style="height:${skipH}px"></div>
-                    <div class="bar-pass" style="height:${passH}px"></div>
-                </div>
-                <div class="bar-label">${d.runId.replace('RUN_','')}</div>
-            </div>`;
-    });
+function sortByCol(col){
+  const map = {runId:'runId', time:'time', total:'total', passed:'passed',
+               failed:'failed', skipped:'skipped', rate:'rate'};
+  const k = map[col]; if (!k) return;
+  if (state.sortKey === k){
+    state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc';
+  } else {
+    state.sortKey = k; state.sortDir = 'desc';
+  }
+  // sync top dropdown if applicable
+  const dropVal = `${k}-${state.sortDir}`;
+  const sel = document.getElementById('sortBy');
+  if ([...sel.options].some(o => o.value === dropVal)) sel.value = dropVal;
+  doSort();
+  renderTable();
+}
 
-    // ===== BUILD TABLE ROWS =====
-    const tbody = document.getElementById('runsBody');
-    tbody.innerHTML = '';
+function doSort(){
+  const k = state.sortKey, d = state.sortDir === 'asc' ? 1 : -1;
+  const get = r => k === 'time'  ? r.epochMs
+                : k === 'rate'  ? r.passRate
+                : k === 'runId' ? r.runId
+                : r[k];
+  state.filteredRuns.sort((a,b) => {
+    const va = get(a), vb = get(b);
+    if (va < vb) return -1 * d;
+    if (va > vb) return  1 * d;
+    return 0;
+  });
+}
 
-    if (runs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:20px;">No runs found.</td></tr>';
-        return;
-    }
+/* ============================================================
+ *  TABLE RENDER
+ * ============================================================ */
+function renderTable(){
+  const tbody = document.getElementById('runsBody');
+  const runs = state.filteredRuns;
 
-    runs.forEach((run, idx) => {
-        const filter = run.failed > 0 ? 'fail' : 'pass';
-        const pill   = run.failed > 0
-            ? `<span class="pill mix">⚠️ Mixed</span>`
-            : `<span class="pill pass">✅ All Pass</span>`;
+  document.getElementById('resultCount').textContent = runs.length;
+  document.getElementById('totalCount').textContent  = state.allRuns.length;
 
-        // build test detail rows
-        let testsHtml = '';
-        (run.tests || []).forEach(t => {
-            const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
-            const errHtml = errMsg
-                ? `<div class="test-row-err">${escHtml(errMsg)}</div>`
-                : '';
+  // header indicators
+  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
 
-            const stackHtml = t.stackTrace
-                ? `<div class="stack-toggle">
-                       <span class="st-label" onclick="toggleStack('stack_${idx}_${t.method}')">
-                           📄 Stack Trace
-                           <span class="stack-arrow" id="arrow_stack_${idx}_${t.method}">▼</span>
-                       </span>
-                   </div>
-                   <div class="stack-box" id="stack_${idx}_${t.method}">${escHtml(t.stackTrace)}</div>`
-                : '';
+  if (!runs.length){
+    tbody.innerHTML = `
+      <tr><td colspan="9">
+        <div class="empty-state">
+          <div class="big">∅</div>
+          <div class="msg">No runs match the current filters</div>
+          <div class="hint">Try adjusting or resetting them above.</div>
+        </div>
+      </td></tr>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
 
-            const shotHtml = t.screenshotUrl
-                ? `<div class="screenshot-thumb">
-                       <div class="shot-label">📸 Failure screenshot</div>
-                       <img src="${t.screenshotUrl}"
-                            onclick="openLightbox('${t.screenshotUrl}')"
-                            onerror="this.parentElement.style.display='none'"/>
-                   </div>`
-                : '';
+  const start = (state.currentPage - 1) * state.pageSize;
+  const slice = runs.slice(start, start + state.pageSize);
 
-            const icon = t.status === 'passed' ? '✅' : t.status === 'failed' ? '❌' : '⚠️';
-            testsHtml += `
-                <div class="test-row ${t.status}">
-                    <div class="test-row-name">${icon} ${escHtml(t.method)}</div>
-                    <div class="test-row-meta">⏱ ${t.duration} ms &nbsp;|&nbsp; 🕐 ${t.startTime}</div>
-                    ${errHtml}
-                    ${stackHtml}
-                    ${shotHtml}
-                </div>`;
+  tbody.innerHTML = slice.map((run, i) => {
+    const idx = start + i;
+    const filter = run.failed > 0 ? 'fail' : run.skipped > 0 ? 'skip' : 'pass';
+    const pill = run.failed  > 0 ? `<span class="pill mix">⚠ Mixed</span>`
+              : run.skipped > 0 ? `<span class="pill skip">⏭ Skipped</span>`
+              : `<span class="pill pass">✓ All Pass</span>`;
+
+    const rateClass = run.passRate >= 80 ? '' : run.passRate >= 50 ? 'mid' : 'low';
+
+    return `
+    <tr class="run-row" data-idx="${idx}">
+      <td><span class="run-id">${run.runId}</span></td>
+      <td>${escHtml(run.timestamp)}</td>
+      <td class="num">${run.total}</td>
+      <td class="num green">${run.passed}</td>
+      <td class="num ${run.failed?'red':'muted'}">${run.failed}</td>
+      <td class="num ${run.skipped?'amber':'muted'}">${run.skipped}</td>
+      <td>
+        <div class="pass-rate-cell">
+          <div class="pass-rate-bar">
+            <div class="pass-rate-fill ${rateClass}" style="width:${run.passRate}%"></div>
+          </div>
+          <span class="pass-rate-text">${run.passRate}%</span>
+        </div>
+      </td>
+      <td>${pill}</td>
+      <td><button class="expand-btn" onclick="toggleDetail(${idx},this)">
+        Tests <span class="arrow">▾</span></button></td>
+    </tr>
+    <tr class="run-detail" id="detail_${idx}">
+      <td colspan="9"><div class="detail-inner">
+        <div class="detail-grid">${buildTestsHtml(run, idx)}</div>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  renderPagination(runs.length);
+}
+
+function buildTestsHtml(run, idx){
+  return (run.tests || []).map((t, ti) => {
+    const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
+    const errHtml = errMsg ? `<div class="test-row-err">${escHtml(errMsg)}</div>` : '';
+
+    const stackId = `stack_${idx}_${ti}`;
+    const stackHtml = t.stackTrace ? `
+      <div class="stack-toggle" onclick="toggleStack('${stackId}',this)">
+        <span>Stack trace</span><span class="stack-arrow">▾</span>
+      </div>
+      <div class="stack-box" id="${stackId}">${escHtml(t.stackTrace)}</div>` : '';
+
+    const shotHtml = t.screenshotUrl ? `
+      <div class="screenshot-thumb">
+        <div class="screenshot-thumb-label">📸 Failure screenshot · click to enlarge</div>
+        <img src="${t.screenshotUrl}"
+             onclick="openLightbox(${idx},${ti})"
+             onerror="this.parentElement.style.display='none'"
+             loading="lazy"/>
+      </div>` : '';
+
+    const icon = t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭';
+    const iconColor = t.status === 'passed' ? 'var(--green)'
+                    : t.status === 'failed' ? 'var(--red)' : 'var(--amber)';
+
+    return `
+      <div class="test-row ${t.status}">
+        <div class="test-row-name">
+          <span style="color:${iconColor};font-weight:800;">${icon}</span>
+          ${escHtml(t.method)}
+        </div>
+        <div class="test-row-meta">${t.duration} ms · ${escHtml(t.startTime)}</div>
+        ${errHtml}${stackHtml}${shotHtml}
+      </div>`;
+  }).join('');
+}
+
+/* ============================================================
+ *  PAGINATION
+ * ============================================================ */
+function renderPagination(total){
+  const pages = Math.ceil(total / state.pageSize);
+  const el = document.getElementById('pagination');
+  if (pages <= 1){ el.innerHTML = ''; return; }
+
+  const cur = state.currentPage;
+  const btn = (label, page, opts = {}) => {
+    const dis    = opts.disabled ? 'disabled' : '';
+    const active = opts.active   ? 'active'   : '';
+    return `<button class="page-btn ${active}" ${dis}
+              onclick="gotoPage(${page})">${label}</button>`;
+  };
+
+  let html = btn('‹', cur - 1, {disabled: cur === 1});
+  // window of pages
+  const window = 5;
+  let from = Math.max(1, cur - 2);
+  let to   = Math.min(pages, from + window - 1);
+  from     = Math.max(1, to - window + 1);
+  if (from > 1)       html += btn('1', 1) + (from > 2 ? '<span style="color:var(--dim);align-self:center;">…</span>' : '');
+  for (let i = from; i <= to; i++) html += btn(i, i, {active: i === cur});
+  if (to < pages)     html += (to < pages - 1 ? '<span style="color:var(--dim);align-self:center;">…</span>' : '') + btn(pages, pages);
+  html += btn('›', cur + 1, {disabled: cur === pages});
+  el.innerHTML = html;
+}
+
+function gotoPage(p){
+  state.currentPage = p;
+  renderTable();
+  window.scrollTo({top: document.querySelector('.runs-wrap').offsetTop - 80, behavior:'smooth'});
+}
+
+/* ============================================================
+ *  EXPAND / STACK
+ * ============================================================ */
+function toggleDetail(idx, btn){
+  const row = document.getElementById('detail_' + idx);
+  if (row){
+    row.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+}
+
+function toggleStack(id, el){
+  const box = document.getElementById(id);
+  if (box) box.classList.toggle('open');
+  if (el)  el.classList.toggle('open');
+}
+
+/* ============================================================
+ *  LIGHTBOX
+ *  - Builds list of all screenshots from currently filtered runs
+ *  - Keyboard nav, zoom (wheel + buttons), pan (drag), download
+ * ============================================================ */
+function openLightbox(runIdx, testIdx){
+  // build full list from filtered runs
+  state.lbList = [];
+  state.filteredRuns.forEach(run => {
+    (run.tests || []).forEach(t => {
+      if (t.screenshotUrl){
+        state.lbList.push({
+          url:       t.screenshotUrl,
+          runId:     run.runId,
+          method:    t.method,
+          timestamp: run.timestamp,
+          status:    t.status
         });
-
-        tbody.innerHTML += `
-        <tr class="run-row" data-filter="${filter}"
-            data-search="${run.runId} ${run.timestamp}">
-            <td style="font-family:monospace;color:#818cf8;">${run.runId}</td>
-            <td>${run.timestamp}</td>
-            <td>${run.total}</td>
-            <td style="color:#22c55e;font-weight:700;">${run.passed}</td>
-            <td style="color:#ef4444;font-weight:700;">${run.failed}</td>
-            <td style="color:#f59e0b;">${run.skipped}</td>
-            <td>
-                <div>${run.passRate}%</div>
-                <div class="pass-rate-bar">
-                    <div class="pass-rate-fill" style="width:${run.passRate}%"></div>
-                </div>
-            </td>
-            <td>${pill}</td>
-            <td><button class="expand-btn" onclick="toggleDetail(${idx})">▼ Tests</button></td>
-        </tr>
-        <tr class="run-detail" id="detail_${idx}">
-            <td colspan="9">
-                <div class="detail-inner">
-                    <div class="detail-grid">${testsHtml}</div>
-                </div>
-            </td>
-        </tr>`;
+      }
     });
-
-    applyPage();
+  });
+  // find the index that matches our clicked thumb
+  const target = state.filteredRuns[runIdx]?.tests?.[testIdx];
+  state.lbIndex = target ? Math.max(0, state.lbList.findIndex(s =>
+    s.url === target.screenshotUrl && s.method === target.method)) : 0;
+  showLightboxImage();
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
-// ===== HELPERS =====
-function escHtml(str) {
-    return (str || '')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;');
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
 }
 
-// ===== PAGINATION =====
-const PAGE_SIZE = 20;
-let currentPage   = 1;
-let currentFilter = 'all';
-
-function getVisibleRows() {
-    return Array.from(document.querySelectorAll('.run-row'))
-                .filter(r => r.style.display !== 'none');
-}
-function renderPagination() {
-    const rows  = getVisibleRows();
-    const pages = Math.ceil(rows.length / PAGE_SIZE);
-    const pagEl = document.getElementById('pagination');
-    pagEl.innerHTML = '';
-    if (pages <= 1) return;
-    for (let i = 1; i <= pages; i++) {
-        const btn = document.createElement('button');
-        btn.className   = 'page-btn' + (i === currentPage ? ' active' : '');
-        btn.textContent = i;
-        btn.onclick = () => { currentPage = i; applyPage(); };
-        pagEl.appendChild(btn);
-    }
-}
-function applyPage() {
-    const rows  = getVisibleRows();
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const end   = start + PAGE_SIZE;
-    rows.forEach((r, i) => {
-        r.style.display = (i >= start && i < end) ? '' : 'none';
-    });
-    renderPagination();
+function showLightboxImage(){
+  const item = state.lbList[state.lbIndex];
+  if (!item) return;
+  const img = document.getElementById('lbImg');
+  img.src = item.url;
+  document.getElementById('lbTitle').textContent   = item.method;
+  document.getElementById('lbMeta').textContent    = `${item.runId} · ${item.timestamp}`;
+  document.getElementById('lbCounter').textContent = `${state.lbIndex + 1} / ${state.lbList.length}`;
+  document.getElementById('lbPrev').disabled = state.lbIndex === 0;
+  document.getElementById('lbNext').disabled = state.lbIndex === state.lbList.length - 1;
+  resetZoom();
 }
 
-// ===== FILTER & SEARCH =====
-function setFilter(type, btn) {
-    currentFilter = type; currentPage = 1;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    applyFilters();
+function lbNext(){ if (state.lbIndex < state.lbList.length - 1){ state.lbIndex++; showLightboxImage(); } }
+function lbPrev(){ if (state.lbIndex > 0){ state.lbIndex--; showLightboxImage(); } }
+
+function setZoom(z){
+  state.lbZoom = Math.max(0.25, Math.min(5, z));
+  applyTransform();
+  document.getElementById('lbZoomText').textContent = Math.round(state.lbZoom * 100) + '%';
+  const stage = document.getElementById('lbStage');
+  if (state.lbZoom > 1) stage.classList.add('zoomed'); else stage.classList.remove('zoomed');
 }
-function filterRuns() { currentPage = 1; applyFilters(); }
-function applyFilters() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('.run-row').forEach(r => {
-        const matchFilter = currentFilter === 'all' || r.dataset.filter === currentFilter;
-        const matchSearch = r.dataset.search.toLowerCase().includes(query);
-        r.style.display   = (matchFilter && matchSearch) ? '' : 'none';
-    });
-    applyPage();
+function resetZoom(){ state.lbPanX = 0; state.lbPanY = 0; setZoom(1); }
+function applyTransform(){
+  const img = document.getElementById('lbImg');
+  img.style.transform = `translate(${state.lbPanX}px,${state.lbPanY}px) scale(${state.lbZoom})`;
 }
 
-// ===== EXPAND / COLLAPSE =====
-function toggleDetail(idx) {
-    document.getElementById('detail_' + idx).classList.toggle('open');
-}
-function toggleStack(id) {
-    const box   = document.getElementById(id);
-    const arrow = document.getElementById('arrow_' + id);
-    if (box)   box.classList.toggle('open');
-    if (arrow) arrow.style.transform = box.classList.contains('open') ? 'rotate(180deg)' : '';
-}
+/* lightbox event wiring */
+document.getElementById('lbClose').onclick    = closeLightbox;
+document.getElementById('lbPrev').onclick     = lbPrev;
+document.getElementById('lbNext').onclick     = lbNext;
+document.getElementById('lbZoomIn').onclick   = () => setZoom(state.lbZoom * 1.25);
+document.getElementById('lbZoomOut').onclick  = () => setZoom(state.lbZoom / 1.25);
+document.getElementById('lbReset').onclick    = resetZoom;
+document.getElementById('lbDownload').onclick = () => {
+  const item = state.lbList[state.lbIndex]; if (!item) return;
+  const a = document.createElement('a');
+  a.href = item.url;
+  a.download = `${item.runId}_${item.method}.png`;
+  a.target = '_blank';
+  a.click();
+};
+document.getElementById('lbOpen').onclick = () => {
+  const item = state.lbList[state.lbIndex]; if (!item) return;
+  window.open(item.url, '_blank');
+};
 
-// ===== LIGHTBOX =====
-function openLightbox(src) {
-    document.getElementById('lightbox-img').src = src;
-    document.getElementById('lightbox').classList.add('active');
-    event.stopPropagation();
+// scroll to zoom
+document.getElementById('lbStage').addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.1 : 1/1.1;
+  setZoom(state.lbZoom * factor);
+}, {passive:false});
+
+// drag to pan
+let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
+const stage = document.getElementById('lbStage');
+stage.addEventListener('mousedown', e => {
+  if (e.target.classList.contains('lb-nav')) return;
+  dragging = true;
+  dragStartX = e.clientX; dragStartY = e.clientY;
+  panStartX = state.lbPanX; panStartY = state.lbPanY;
+  stage.classList.add('grabbing');
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  state.lbPanX = panStartX + (e.clientX - dragStartX);
+  state.lbPanY = panStartY + (e.clientY - dragStartY);
+  applyTransform();
+});
+window.addEventListener('mouseup', () => {
+  dragging = false; stage.classList.remove('grabbing');
+});
+
+// keyboard
+window.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape')      closeLightbox();
+  else if (e.key === 'ArrowLeft')   lbPrev();
+  else if (e.key === 'ArrowRight')  lbNext();
+  else if (e.key === '+' || e.key === '=') setZoom(state.lbZoom * 1.25);
+  else if (e.key === '-')      setZoom(state.lbZoom / 1.25);
+  else if (e.key === '0')      resetZoom();
+  else if (e.key.toLowerCase() === 'd') document.getElementById('lbDownload').click();
+});
+
+// click backdrop to close
+stage.addEventListener('click', e => {
+  if (e.target === stage) closeLightbox();
+});
+
+/* ============================================================
+ *  STAT-CARD click-to-filter
+ * ============================================================ */
+document.querySelectorAll('.stat-card[data-stat]').forEach(card => {
+  card.addEventListener('click', () => {
+    const s = card.dataset.stat;
+    const chip = document.querySelector(`#statusChips .chip[data-status="${s}"]`);
+    if (chip) chip.click();
+    window.scrollTo({top: document.querySelector('.filter-panel').offsetTop - 80, behavior:'smooth'});
+  });
+});
+
+/* ============================================================
+ *  HELPERS
+ * ============================================================ */
+function numOrNull(v){
+  if (v === '' || v === null || v === undefined) return null;
+  const n = Number(v); return isNaN(n) ? null : n;
+}
+function escHtml(s){
+  return (s ?? '')
+    .toString()
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 </script>
 </body>
