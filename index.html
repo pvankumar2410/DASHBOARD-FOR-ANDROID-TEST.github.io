@@ -303,20 +303,84 @@
     border:1px solid var(--line);color:var(--muted);}
   .stack-box.open{display:block;}
 
-  .screenshot-thumb{margin-top:12px;}
-  .screenshot-thumb-label{font-size:10px;color:var(--dim);margin-bottom:6px;
-    letter-spacing:0.04em;text-transform:uppercase;font-weight:600;
-    display:flex;align-items:center;gap:6px;}
-  .screenshot-thumb img{
-    width:100%;max-width:280px;border-radius:8px;
-    border:1px solid var(--line-2);
-    cursor:zoom-in;display:block;
-    transition:all 0.2s;
+  /* ============== GALLERY STRIP ============== */
+  .gallery-strip{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;margin-bottom:14px;
   }
-  .screenshot-thumb img:hover{
-    transform:scale(1.015);border-color:var(--accent);
-    box-shadow:0 8px 24px -8px rgba(124,140,255,0.4);
+  .gallery-head{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:10px;
   }
+  .gallery-head .gtitle{
+    font-size:10px;color:var(--muted);font-weight:700;
+    letter-spacing:0.06em;text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .gallery-head .gtitle .count-badge{
+    background:var(--red-bg);color:var(--red);
+    padding:2px 8px;border-radius:999px;font-size:10px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .gallery-head .view-all{
+    font-size:10px;color:var(--accent);background:none;border:none;
+    cursor:pointer;font-family:inherit;font-weight:600;
+    letter-spacing:0.04em;text-transform:uppercase;padding:4px 8px;
+    border-radius:6px;transition:background 0.15s;
+  }
+  .gallery-head .view-all:hover{background:rgba(124,140,255,0.1);}
+
+  .gallery-row{
+    display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;
+    scrollbar-width:thin;scrollbar-color:#2a2a44 transparent;
+  }
+  .gallery-row::-webkit-scrollbar{height:6px;}
+  .gallery-row::-webkit-scrollbar-track{background:transparent;}
+  .gallery-row::-webkit-scrollbar-thumb{background:#2a2a44;border-radius:3px;}
+
+  .gallery-thumb{
+    flex:0 0 auto;position:relative;
+    width:100px;height:100px;border-radius:8px;overflow:hidden;
+    border:2px solid var(--line-2);cursor:zoom-in;
+    background:var(--bg-2);transition:all 0.18s ease;
+  }
+  .gallery-thumb:hover{
+    border-color:var(--accent);transform:translateY(-2px);
+    box-shadow:0 8px 20px -8px rgba(124,140,255,0.5);
+  }
+  .gallery-thumb img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    background:#fff;
+  }
+  .gallery-thumb .thumb-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,0.85));
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:6px 8px;
+    opacity:0;transition:opacity 0.18s;
+  }
+  .gallery-thumb:hover .thumb-overlay{opacity:1;}
+  .gallery-thumb .thumb-method{
+    font-size:9px;color:#fff;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .gallery-thumb .thumb-status{
+    position:absolute;top:6px;right:6px;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--red);color:#fff;
+    display:grid;place-items:center;font-size:11px;font-weight:800;
+    border:2px solid var(--bg);
+  }
+  .gallery-thumb.passed .thumb-status{background:var(--green);}
+  .gallery-thumb.skipped .thumb-status{background:var(--amber);}
+
+  .test-link{
+    display:inline-block;margin-top:8px;font-size:10px;color:var(--accent);
+    cursor:pointer;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
+    background:rgba(124,140,255,0.08);padding:4px 10px;border-radius:6px;
+    border:1px solid rgba(124,140,255,0.2);transition:all 0.15s;
+  }
+  .test-link:hover{background:rgba(124,140,255,0.18);}
 
   /* ============== LIGHTBOX ============== */
   .lightbox{
@@ -898,12 +962,48 @@ function renderTable(){
     </tr>
     <tr class="run-detail" id="detail_${idx}">
       <td colspan="9"><div class="detail-inner">
+        ${buildGalleryStrip(run, idx)}
         <div class="detail-grid">${buildTestsHtml(run, idx)}</div>
       </div></td>
     </tr>`;
   }).join('');
 
   renderPagination(runs.length);
+}
+
+function buildGalleryStrip(run, idx){
+  // collect every test that has a screenshot, in original order
+  const shots = (run.tests || [])
+    .map((t, ti) => ({t, ti}))
+    .filter(x => x.t.screenshotUrl);
+
+  if (!shots.length) return '';
+
+  const thumbs = shots.map(({t, ti}) => `
+    <div class="gallery-thumb ${t.status}"
+         onclick="openLightbox(${idx},${ti})"
+         title="${escHtml(t.method)} — click to enlarge">
+      <img src="${t.screenshotUrl}" loading="lazy"
+           onerror="this.parentElement.style.display='none'"/>
+      <div class="thumb-status">${t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭'}</div>
+      <div class="thumb-overlay">
+        <div class="thumb-method">${escHtml(t.method)}</div>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="gallery-strip">
+      <div class="gallery-head">
+        <span class="gtitle">
+          📸 Screenshots
+          <span class="count-badge">${shots.length}</span>
+        </span>
+        <button class="view-all" onclick="openLightbox(${idx},${shots[0].ti})">
+          Open viewer →
+        </button>
+      </div>
+      <div class="gallery-row">${thumbs}</div>
+    </div>`;
 }
 
 function buildTestsHtml(run, idx){
@@ -918,14 +1018,11 @@ function buildTestsHtml(run, idx){
       </div>
       <div class="stack-box" id="${stackId}">${escHtml(t.stackTrace)}</div>` : '';
 
-    const shotHtml = t.screenshotUrl ? `
-      <div class="screenshot-thumb">
-        <div class="screenshot-thumb-label">📸 Failure screenshot · click to enlarge</div>
-        <img src="${t.screenshotUrl}"
-             onclick="openLightbox(${idx},${ti})"
-             onerror="this.parentElement.style.display='none'"
-             loading="lazy"/>
-      </div>` : '';
+    // compact link instead of inline thumbnail — the gallery strip above
+    // already shows all screenshots for this run.
+    const shotHtml = t.screenshotUrl
+      ? `<div><span class="test-link" onclick="openLightbox(${idx},${ti})">📸 View screenshot</span></div>`
+      : '';
 
     const icon = t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭';
     const iconColor = t.status === 'passed' ? 'var(--green)'
