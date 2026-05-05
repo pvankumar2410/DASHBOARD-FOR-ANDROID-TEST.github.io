@@ -329,6 +329,32 @@
   .pill.mix {background:var(--amber-bg);color:var(--amber);}
   .pill.skip{background:rgba(122,130,154,0.15);color:var(--muted);}
 
+  /* ============== PLATFORM BADGES ============== */
+  .platform-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 9px;border-radius:6px;
+    font-size:10px;font-weight:700;letter-spacing:0.06em;
+    text-transform:uppercase;font-family:'JetBrains Mono',monospace;
+    border:1px solid transparent;
+  }
+  .platform-badge.android{
+    background:rgba(61,220,132,0.12);color:#3ddc84;
+    border-color:rgba(61,220,132,0.25);
+  }
+  .platform-badge.ios{
+    background:rgba(160,160,170,0.12);color:#c8c8d0;
+    border-color:rgba(160,160,170,0.25);
+  }
+  .platform-badge.web{
+    background:rgba(96,165,250,0.12);color:#60a5fa;
+    border-color:rgba(96,165,250,0.25);
+  }
+  .platform-badge.other{
+    background:rgba(167,139,250,0.12);color:#a78bfa;
+    border-color:rgba(167,139,250,0.25);
+  }
+  .platform-badge .pf-icon{font-size:11px;line-height:1;}
+
   .num{font-family:'JetBrains Mono',monospace;font-weight:600;}
   .num.green{color:var(--green);}
   .num.red{color:var(--red);}
@@ -694,6 +720,17 @@
       </div>
 
       <div class="filter-field">
+        <label>Platform</label>
+        <select class="filter-select" id="f-platform" onchange="applyFilters()">
+          <option value="">All platforms</option>
+          <option value="ANDROID">📱 Android</option>
+          <option value="IOS">🍎 iOS</option>
+          <option value="WEB">🌐 Web</option>
+          <option value="OTHER">⚙️ Other</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
         <label>Test method</label>
         <select class="filter-select" id="f-method" onchange="applyFilters()">
           <option value="">All methods</option>
@@ -759,6 +796,7 @@
       <thead>
         <tr>
           <th class="sortable" onclick="sortByCol('runId')">Run ID<span class="sort-ind">⇅</span></th>
+          <th class="sortable" onclick="sortByCol('platform')">Platform<span class="sort-ind">⇅</span></th>
           <th class="sortable" onclick="sortByCol('time')">Timestamp<span class="sort-ind">⇅</span></th>
           <th class="sortable" onclick="sortByCol('total')">Total<span class="sort-ind">⇅</span></th>
           <th class="sortable" onclick="sortByCol('passed')">Passed<span class="sort-ind">⇅</span></th>
@@ -770,7 +808,7 @@
         </tr>
       </thead>
       <tbody id="runsBody">
-        <tr><td colspan="9" class="loading">⏳ Loading runs...</td></tr>
+        <tr><td colspan="10" class="loading">⏳ Loading runs...</td></tr>
       </tbody>
     </table>
   </div>
@@ -835,6 +873,13 @@ fetch('history.json?t=' + Date.now())
   .then(runs => {
     const seen = new Set();
     runs = runs.filter(r => seen.has(r.runId) ? false : (seen.add(r.runId), true));
+    // Normalize platform field. Missing/empty → ANDROID (legacy default since
+    // this project started Android-only). Unknown values → OTHER.
+    const KNOWN = new Set(['ANDROID','IOS','WEB','OTHER']);
+    runs.forEach(r => {
+      const p = (r.platform || '').toString().trim().toUpperCase();
+      r.platform = !p ? 'ANDROID' : (KNOWN.has(p) ? p : 'OTHER');
+    });
     runs.sort((a,b) => b.epochMs - a.epochMs);
     state.allRuns = runs;
     populateMethodFilter(runs);
@@ -844,7 +889,7 @@ fetch('history.json?t=' + Date.now())
   .catch(err => {
     console.error('load failed:', err);
     document.getElementById('runsBody').innerHTML =
-      `<tr><td colspan="9" class="empty-state">
+      `<tr><td colspan="10" class="empty-state">
         <div class="big">⚠️</div>
         <div class="msg">Failed to load history.json</div>
         <div class="hint">${escHtml(err.message)}</div>
@@ -1181,6 +1226,7 @@ function resetFilters(){
   ['f-search','f-date-from','f-date-to','f-rate-min','f-rate-max',
    'f-total-min','f-total-max'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-method').value = '';
+  document.getElementById('f-platform').value = '';
   document.getElementById('f-screenshots').value = 'any';
   document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.remove('active'));
   document.querySelector('#statusChips .chip[data-status="all"]').classList.add('active');
@@ -1190,15 +1236,16 @@ function resetFilters(){
 }
 
 function applyFilters(){
-  const q       = document.getElementById('f-search').value.toLowerCase().trim();
-  const dateFr  = document.getElementById('f-date-from').value;
-  const dateTo  = document.getElementById('f-date-to').value;
-  const method  = document.getElementById('f-method').value;
-  const rateMin = numOrNull(document.getElementById('f-rate-min').value);
-  const rateMax = numOrNull(document.getElementById('f-rate-max').value);
-  const totMin  = numOrNull(document.getElementById('f-total-min').value);
-  const totMax  = numOrNull(document.getElementById('f-total-max').value);
-  const shotsF  = document.getElementById('f-screenshots').value;
+  const q        = document.getElementById('f-search').value.toLowerCase().trim();
+  const dateFr   = document.getElementById('f-date-from').value;
+  const dateTo   = document.getElementById('f-date-to').value;
+  const method   = document.getElementById('f-method').value;
+  const platform = document.getElementById('f-platform').value;
+  const rateMin  = numOrNull(document.getElementById('f-rate-min').value);
+  const rateMax  = numOrNull(document.getElementById('f-rate-max').value);
+  const totMin   = numOrNull(document.getElementById('f-total-min').value);
+  const totMax   = numOrNull(document.getElementById('f-total-max').value);
+  const shotsF   = document.getElementById('f-screenshots').value;
 
   const dateFrMs = dateFr ? new Date(dateFr + 'T00:00:00').getTime() : null;
   const dateToMs = dateTo ? new Date(dateTo + 'T23:59:59').getTime() : null;
@@ -1208,6 +1255,9 @@ function applyFilters(){
     if (state.status === 'pass' && r.failed > 0)              return false;
     if (state.status === 'fail' && r.failed === 0)            return false;
     if (state.status === 'skip' && r.skipped === 0)           return false;
+
+    // platform
+    if (platform && r.platform !== platform)                  return false;
 
     // date
     if (dateFrMs !== null && r.epochMs < dateFrMs)            return false;
@@ -1229,9 +1279,9 @@ function applyFilters(){
     if (shotsF === 'yes' && !hasShots)                        return false;
     if (shotsF === 'no'  &&  hasShots)                        return false;
 
-    // text search — runId, timestamp, methods, error messages
+    // text search — runId, timestamp, methods, error messages, platform
     if (q){
-      const hay = (r.runId + ' ' + r.timestamp + ' ' +
+      const hay = (r.runId + ' ' + r.timestamp + ' ' + (r.platform || '') + ' ' +
         (r.tests || []).map(t => t.method + ' ' + (t.errorMessage||'')).join(' ')
       ).toLowerCase();
       if (!hay.includes(q)) return false;
@@ -1254,8 +1304,8 @@ function applySort(){
 }
 
 function sortByCol(col){
-  const map = {runId:'runId', time:'time', total:'total', passed:'passed',
-               failed:'failed', skipped:'skipped', rate:'rate'};
+  const map = {runId:'runId', platform:'platform', time:'time', total:'total',
+               passed:'passed', failed:'failed', skipped:'skipped', rate:'rate'};
   const k = map[col]; if (!k) return;
   if (state.sortKey === k){
     state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc';
@@ -1272,9 +1322,10 @@ function sortByCol(col){
 
 function doSort(){
   const k = state.sortKey, d = state.sortDir === 'asc' ? 1 : -1;
-  const get = r => k === 'time'  ? r.epochMs
-                : k === 'rate'  ? r.passRate
-                : k === 'runId' ? r.runId
+  const get = r => k === 'time'     ? r.epochMs
+                : k === 'rate'     ? r.passRate
+                : k === 'runId'    ? r.runId
+                : k === 'platform' ? (r.platform || '')
                 : r[k];
   state.filteredRuns.sort((a,b) => {
     const va = get(a), vb = get(b);
@@ -1299,7 +1350,7 @@ function renderTable(){
 
   if (!runs.length){
     tbody.innerHTML = `
-      <tr><td colspan="9">
+      <tr><td colspan="10">
         <div class="empty-state">
           <div class="big">∅</div>
           <div class="msg">No runs match the current filters</div>
@@ -1325,6 +1376,7 @@ function renderTable(){
     return `
     <tr class="run-row" data-idx="${idx}">
       <td><span class="run-id">${run.runId}</span></td>
+      <td>${platformBadge(run.platform)}</td>
       <td>${escHtml(run.timestamp)}</td>
       <td class="num">${run.total}</td>
       <td class="num green">${run.passed}</td>
@@ -1343,7 +1395,7 @@ function renderTable(){
         Tests <span class="arrow">▾</span></button></td>
     </tr>
     <tr class="run-detail" id="detail_${idx}">
-      <td colspan="9"><div class="detail-inner">
+      <td colspan="10"><div class="detail-inner">
         ${buildGalleryStrip(run, idx)}
         <div class="detail-grid">${buildTestsHtml(run, idx)}</div>
       </div></td>
@@ -1351,6 +1403,20 @@ function renderTable(){
   }).join('');
 
   renderPagination(runs.length);
+}
+
+/* renders a small colored pill for the platform value */
+function platformBadge(p){
+  const platform = (p || 'ANDROID').toUpperCase();
+  const config = {
+    ANDROID: {cls:'android', icon:'📱', label:'Android'},
+    IOS:     {cls:'ios',     icon:'🍎', label:'iOS'},
+    WEB:     {cls:'web',     icon:'🌐', label:'Web'},
+    OTHER:   {cls:'other',   icon:'⚙️', label:'Other'}
+  }[platform] || {cls:'other', icon:'⚙️', label:platform};
+  return `<span class="platform-badge ${config.cls}">
+    <span class="pf-icon">${config.icon}</span>${config.label}
+  </span>`;
 }
 
 function buildGalleryStrip(run, idx){
