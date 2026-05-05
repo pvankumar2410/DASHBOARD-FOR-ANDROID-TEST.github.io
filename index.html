@@ -437,7 +437,8 @@
 
   .stack-toggle{margin-top:8px;font-size:10px;color:var(--accent);
     cursor:pointer;user-select:none;display:inline-flex;
-    align-items:center;gap:6px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+    align-items:center;gap:6px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
+    margin-right:10px;}
   .stack-toggle:hover{color:var(--accent-2);}
   .stack-arrow{font-size:9px;transition:transform 0.2s;}
   .stack-toggle.open .stack-arrow{transform:rotate(180deg);}
@@ -448,6 +449,29 @@
     max-height:240px;overflow-y:auto;
     border:1px solid var(--line);color:var(--muted);}
   .stack-box.open{display:block;}
+
+  /* ===== Logs toggle — green variant of stack-toggle =====
+     Reuses the same toggle/arrow markup so toggleStack() works on both. */
+  .logs-toggle{
+    margin-top:8px;font-size:10px;color:var(--green);
+    cursor:pointer;user-select:none;display:inline-flex;
+    align-items:center;gap:6px;font-weight:600;
+    letter-spacing:0.04em;text-transform:uppercase;
+    margin-right:10px;
+  }
+  .logs-toggle:hover{color:#16a34a;}
+  .logs-toggle.open .stack-arrow{transform:rotate(180deg);}
+  .logs-box{
+    display:none;margin-top:8px;background:var(--bg);
+    border-radius:6px;padding:10px 12px;
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;
+    white-space:pre-wrap;word-break:break-word;
+    max-height:240px;overflow-y:auto;
+    border:1px solid var(--line);
+    border-left:2px solid var(--green);
+    color:var(--text);line-height:1.55;
+  }
+  .logs-box.open{display:block;}
 
   /* ============== GALLERY STRIP ============== */
   .gallery-strip{
@@ -707,7 +731,7 @@
       <div class="filter-field">
         <label>Search</label>
         <input class="filter-input" id="f-search" type="text"
-               placeholder="Run ID, timestamp, test method, error..."
+               placeholder="Run ID, timestamp, method, error, log content..."
                oninput="applyFilters()"/>
       </div>
 
@@ -1280,10 +1304,12 @@ function applyFilters(){
     if (shotsF === 'yes' && !hasShots)                        return false;
     if (shotsF === 'no'  &&  hasShots)                        return false;
 
-    // text search — runId, timestamp, methods, error messages, platform
+    // text search — runId, timestamp, methods, errors, logs, platform
     if (q){
       const hay = (r.runId + ' ' + r.timestamp + ' ' + (r.platform || '') + ' ' +
-        (r.tests || []).map(t => t.method + ' ' + (t.errorMessage||'')).join(' ')
+        (r.tests || []).map(t =>
+          t.method + ' ' + (t.errorMessage || '') + ' ' + (t.logs || '')
+        ).join(' ')
       ).toLowerCase();
       if (!hay.includes(q)) return false;
     }
@@ -1460,6 +1486,15 @@ function buildTestsHtml(run, idx){
     const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
     const errHtml = errMsg ? `<div class="test-row-err">${escHtml(errMsg)}</div>` : '';
 
+    // ----- Logs toggle (green) — shown for any test that has a logs field -----
+    const logsId = `logs_${idx}_${ti}`;
+    const logsHtml = t.logs ? `
+      <div class="logs-toggle" onclick="toggleStack('${logsId}',this)">
+        <span>📜 Logs</span><span class="stack-arrow">▾</span>
+      </div>
+      <div class="logs-box" id="${logsId}">${escHtml(t.logs)}</div>` : '';
+
+    // ----- Stack trace toggle (blue) — shown for failed tests -----
     const stackId = `stack_${idx}_${ti}`;
     const stackHtml = t.stackTrace ? `
       <div class="stack-toggle" onclick="toggleStack('${stackId}',this)">
@@ -1484,7 +1519,7 @@ function buildTestsHtml(run, idx){
           <span class="name-text" title="${escHtml(t.method)}">${escHtml(t.method)}</span>
         </div>
         <div class="test-row-meta">${t.duration} ms · ${escHtml(t.startTime)}</div>
-        ${errHtml}${stackHtml}${shotHtml}
+        ${errHtml}${logsHtml}${stackHtml}${shotHtml}
       </div>`;
   }).join('');
 }
@@ -1525,7 +1560,7 @@ function gotoPage(p){
 }
 
 /* ============================================================
- *  EXPAND / STACK
+ *  EXPAND / STACK / LOGS
  * ============================================================ */
 function toggleDetail(idx, btn){
   const row = document.getElementById('detail_' + idx);
@@ -1535,6 +1570,7 @@ function toggleDetail(idx, btn){
   }
 }
 
+/* Used by both stack-trace and logs toggles — same show/hide behavior. */
 function toggleStack(id, el){
   const box = document.getElementById(id);
   if (box) box.classList.toggle('open');
