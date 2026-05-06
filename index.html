@@ -7,9 +7,45 @@
 <link rel="icon" type="image/png" href="favicon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
+  /* ================== LIGHT THEME (default) ================== */
+  :root, [data-theme="light"]{
+    --bg:#f6f7fb;
+    --bg-2:#eef0f6;
+    --panel:#ffffff;
+    --panel-2:#fafbfd;
+    --line:#e6e8ef;
+    --line-2:#d4d8e3;
+    --text:#1a1d2e;
+    --muted:#6b7287;
+    --dim:#9ba1b3;
+    --accent:#5b6cff;
+    --accent-2:#8b5cf6;
+    --accent-soft:rgba(91,108,255,0.08);
+    --accent-soft-2:rgba(91,108,255,0.14);
+    --green:#16a34a;
+    --green-bg:rgba(22,163,74,0.10);
+    --green-border:rgba(22,163,74,0.22);
+    --red:#dc2626;
+    --red-bg:rgba(220,38,38,0.10);
+    --red-border:rgba(220,38,38,0.22);
+    --amber:#d97706;
+    --amber-bg:rgba(217,119,6,0.10);
+    --amber-border:rgba(217,119,6,0.22);
+    --shadow-sm:0 1px 2px rgba(20,25,50,0.04);
+    --shadow:0 4px 16px -4px rgba(20,25,50,0.08);
+    --shadow-lg:0 12px 36px -10px rgba(20,25,50,0.18);
+    --grid-line:rgba(20,25,50,0.05);
+    --bar-track:rgba(20,25,50,0.05);
+    --tooltip-bg:#ffffff;
+    --code-bg:#f6f7fb;
+    --header-bg:rgba(255,255,255,0.85);
+    --bg-grad-1:rgba(91,108,255,0.06);
+    --bg-grad-2:rgba(139,92,246,0.05);
+  }
+  /* ================== DARK THEME ================== */
+  [data-theme="dark"]{
     --bg:#0a0a14;
     --bg-2:#11111e;
     --panel:#171728;
@@ -21,107 +57,205 @@
     --dim:#535b76;
     --accent:#7c8cff;
     --accent-2:#a78bfa;
+    --accent-soft:rgba(124,140,255,0.10);
+    --accent-soft-2:rgba(124,140,255,0.18);
     --green:#22c55e;
     --green-bg:rgba(34,197,94,0.12);
+    --green-border:rgba(34,197,94,0.25);
     --red:#ef4444;
     --red-bg:rgba(239,68,68,0.12);
+    --red-border:rgba(239,68,68,0.25);
     --amber:#f59e0b;
     --amber-bg:rgba(245,158,11,0.12);
-    --shadow:0 10px 40px -10px rgba(0,0,0,0.5);
+    --amber-border:rgba(245,158,11,0.25);
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
+    --shadow:0 4px 16px -4px rgba(0,0,0,0.4);
+    --shadow-lg:0 12px 36px -10px rgba(0,0,0,0.6);
+    --grid-line:rgba(255,255,255,0.05);
+    --bar-track:rgba(255,255,255,0.03);
+    --tooltip-bg:#11111e;
+    --code-bg:#0a0a14;
+    --header-bg:rgba(10,10,20,0.85);
+    --bg-grad-1:rgba(124,140,255,0.08);
+    --bg-grad-2:rgba(167,139,250,0.06);
   }
 
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+  html,body{
+    background:var(--bg);color:var(--text);
+    font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    transition:background 0.25s,color 0.25s;
+  }
   body{
     background-image:
-      radial-gradient(1200px 600px at 80% -10%,rgba(124,140,255,0.08),transparent 60%),
-      radial-gradient(800px 500px at -10% 20%,rgba(167,139,250,0.06),transparent 60%);
+      radial-gradient(1200px 600px at 80% -10%,var(--bg-grad-1),transparent 60%),
+      radial-gradient(800px 500px at -10% 20%,var(--bg-grad-2),transparent 60%);
   }
-  ::selection{background:rgba(124,140,255,0.35);color:#fff;}
+  ::selection{background:var(--accent-soft-2);color:var(--text);}
 
   /* ============== HEADER ============== */
   header{
-    padding:22px 36px;display:flex;justify-content:space-between;align-items:center;
+    padding:20px 36px;display:flex;justify-content:space-between;align-items:center;
     border-bottom:1px solid var(--line);
-    backdrop-filter:blur(8px);
+    backdrop-filter:blur(10px);
     position:sticky;top:0;z-index:50;
-    background:rgba(10,10,20,0.85);
+    background:var(--header-bg);
   }
   .brand{display:flex;align-items:center;gap:14px;}
   .brand-logo{
-    height:40px;width:auto;display:block;
-    /* the logo's blue is dark — slight glow keeps it visible on the dark header */
-    filter:drop-shadow(0 4px 12px rgba(124,140,255,0.25));
+    height:38px;width:auto;display:block;
     flex-shrink:0;
   }
-  header h1{font-size:18px;font-weight:700;letter-spacing:-0.01em;}
+  header h1{font-size:18px;font-weight:700;letter-spacing:-0.01em;color:var(--text);}
   header h1 .sub{font-weight:500;color:var(--muted);margin-left:6px;}
-  header p{font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+  header p{font-size:11px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+
+  .header-right{display:flex;align-items:center;gap:14px;}
   .live-badge{
     display:inline-flex;align-items:center;gap:8px;
-    background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);
+    background:var(--green-bg);border:1px solid var(--green-border);
     color:var(--green);padding:6px 12px;border-radius:999px;
     font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
   }
   .live-badge .dot{
     width:6px;height:6px;border-radius:50%;background:var(--green);
-    box-shadow:0 0 0 0 rgba(34,197,94,0.7);
     animation:pulse 2s infinite;
   }
   @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(34,197,94,0.6);}
-    70%{box-shadow:0 0 0 8px rgba(34,197,94,0);}
-    100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+    0%{box-shadow:0 0 0 0 rgba(22,163,74,0.5);}
+    70%{box-shadow:0 0 0 8px rgba(22,163,74,0);}
+    100%{box-shadow:0 0 0 0 rgba(22,163,74,0);}
+  }
+  .theme-toggle{
+    width:38px;height:38px;border-radius:10px;
+    background:var(--panel);border:1px solid var(--line-2);
+    color:var(--text);cursor:pointer;display:grid;place-items:center;
+    font-size:16px;transition:all 0.18s;
+  }
+  .theme-toggle:hover{
+    background:var(--accent-soft);border-color:var(--accent);
+    transform:translateY(-1px);
   }
 
-  .container{padding:32px 36px 80px;max-width:1600px;margin:0 auto;}
+  .container{padding:28px 36px 80px;max-width:1600px;margin:0 auto;}
 
-  /* ============== STAT CARDS ============== */
+  /* ============== TOP ROW: STATS + DONUT ============== */
+  .top-row{
+    display:grid;
+    grid-template-columns:1fr 320px;
+    gap:18px;
+    margin-bottom:20px;
+  }
+  @media (max-width:1024px){
+    .top-row{grid-template-columns:1fr;}
+  }
+
   .summary-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-    gap:14px;margin-bottom:24px;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:14px;
   }
   .stat-card{
     position:relative;background:var(--panel);border-radius:14px;padding:20px 22px;
     border:1px solid var(--line);overflow:hidden;cursor:pointer;
-    transition:transform 0.15s ease,border-color 0.15s ease;
+    box-shadow:var(--shadow-sm);
+    transition:transform 0.18s ease,border-color 0.18s ease,box-shadow 0.18s ease;
   }
-  .stat-card:hover{transform:translateY(-2px);border-color:var(--line-2);}
-  .stat-card::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,transparent,rgba(255,255,255,0.02));
-    pointer-events:none;
+  .stat-card:hover{
+    transform:translateY(-2px);
+    border-color:var(--line-2);
+    box-shadow:var(--shadow);
   }
-  .stat-card .lbl{font-size:11px;color:var(--muted);font-weight:600;
-    letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;}
-  .stat-card .val{font-size:34px;font-weight:800;letter-spacing:-0.02em;line-height:1;}
-  .stat-card .delta{font-size:11px;color:var(--muted);margin-top:6px;
-    font-family:'JetBrains Mono',monospace;}
-  .stat-card.runs   .val{background:linear-gradient(135deg,#7c8cff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .stat-card.tests  .val{color:var(--text);}
+  .stat-card .lbl{
+    font-size:10px;color:var(--muted);font-weight:700;
+    letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .stat-card .lbl-icon{
+    width:22px;height:22px;border-radius:6px;
+    display:grid;place-items:center;font-size:11px;
+    background:var(--accent-soft);color:var(--accent);
+  }
+  .stat-card.passed .lbl-icon{background:var(--green-bg);color:var(--green);}
+  .stat-card.failed .lbl-icon{background:var(--red-bg);color:var(--red);}
+  .stat-card.rate   .lbl-icon{background:var(--amber-bg);color:var(--amber);}
+
+  .stat-card .val{font-size:30px;font-weight:800;letter-spacing:-0.02em;line-height:1;color:var(--text);}
+  .stat-card .delta{
+    font-size:10.5px;color:var(--muted);margin-top:8px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .stat-card.runs   .val{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
   .stat-card.passed .val{color:var(--green);}
   .stat-card.failed .val{color:var(--red);}
   .stat-card.rate   .val{color:var(--amber);}
 
+  /* ============== DONUT CARD ============== */
+  .donut-card{
+    background:var(--panel);border-radius:14px;
+    border:1px solid var(--line);padding:20px;
+    box-shadow:var(--shadow-sm);
+    display:flex;flex-direction:column;
+  }
+  .donut-card .donut-head{
+    font-size:10px;color:var(--muted);font-weight:700;
+    letter-spacing:0.08em;text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .donut-wrap{
+    display:flex;align-items:center;gap:18px;flex:1;
+  }
+  .donut-svg{
+    flex-shrink:0;width:120px;height:120px;
+    position:relative;
+  }
+  .donut-svg svg{display:block;width:100%;height:100%;}
+  .donut-center{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    pointer-events:none;
+  }
+  .donut-center .dc-val{font-size:24px;font-weight:800;color:var(--text);letter-spacing:-0.02em;line-height:1;}
+  .donut-center .dc-lbl{font-size:9px;color:var(--muted);font-weight:600;
+    letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
+  .donut-legend{
+    flex:1;display:flex;flex-direction:column;gap:10px;
+  }
+  .donut-leg-row{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:12px;
+  }
+  .donut-leg-row .left{display:flex;align-items:center;gap:8px;}
+  .donut-leg-row .swatch{
+    width:10px;height:10px;border-radius:3px;
+  }
+  .donut-leg-row .name{color:var(--muted);font-weight:500;}
+  .donut-leg-row .val{
+    font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text);
+  }
+
   /* ============== CHART ============== */
   .chart-wrap{
-    background:var(--panel);border-radius:14px;padding:22px 24px;margin-bottom:24px;
-    border:1px solid var(--line);
+    background:var(--panel);border-radius:14px;padding:22px 24px;margin-bottom:20px;
+    border:1px solid var(--line);box-shadow:var(--shadow-sm);
   }
   .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;}
   .chart-head .left{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
   .chart-head h3{font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);}
   .chart-meta{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;}
   .chart-meta strong{color:var(--accent);}
-  .legend{display:flex;gap:18px;font-size:11px;color:var(--text);align-items:center;}
-  .legend-item{display:flex;align-items:center;gap:8px;font-weight:500;}
+  .legend{display:flex;gap:16px;font-size:11px;color:var(--text);align-items:center;}
+  .legend-item{display:flex;align-items:center;gap:7px;font-weight:500;}
   .legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
 
   .chart-controls{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
   .view-toggle{
     display:flex;background:var(--bg-2);border:1px solid var(--line-2);
-    border-radius:8px;padding:3px;
+    border-radius:9px;padding:3px;
   }
   .vt-btn{
     background:transparent;border:none;cursor:pointer;
@@ -132,14 +266,14 @@
   }
   .vt-btn:hover{color:var(--text);}
   .vt-btn.active{
-    background:linear-gradient(135deg,#7c8cff,#a78bfa);
-    color:#0a0a14;box-shadow:0 4px 12px -4px rgba(124,140,255,0.5);
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff;box-shadow:0 4px 12px -4px rgba(91,108,255,0.5);
   }
 
   /* ============== LINE CHART ============== */
   .chart-line{padding:8px 0 0;position:relative;}
   .chart-line svg{display:block;width:100%;height:280px;overflow:visible;}
-  .chart-line .grid-line{stroke:rgba(255,255,255,0.05);stroke-width:1;}
+  .chart-line .grid-line{stroke:var(--grid-line);stroke-width:1;}
   .chart-line .axis-text{
     fill:var(--dim);font-size:10px;
     font-family:'JetBrains Mono',monospace;
@@ -150,27 +284,26 @@
     stroke-linecap:round;stroke-linejoin:round;
     transition:stroke-width 0.15s;
   }
-  .chart-line .data-area{opacity:0.08;}
-  .chart-line .dot{
-    cursor:pointer;transition:r 0.12s;
-  }
+  .chart-line .data-area{opacity:0.10;}
+  [data-theme="dark"] .chart-line .data-area{opacity:0.08;}
+  .chart-line .dot{cursor:pointer;transition:r 0.12s;}
   .chart-line .dot:hover{r:6;}
   .chart-line .hover-line{
-    stroke:rgba(255,255,255,0.15);stroke-width:1;
+    stroke:var(--text);stroke-width:1;opacity:0;
     stroke-dasharray:3 3;pointer-events:none;
-    opacity:0;transition:opacity 0.1s;
+    transition:opacity 0.1s;
   }
-  .chart-line.has-hover .hover-line{opacity:1;}
+  .chart-line.has-hover .hover-line{opacity:0.25;}
 
   .chart-bars{
     display:flex;align-items:flex-end;gap:6px;height:200px;
     overflow-x:auto;padding:18px 4px 8px;
-    scrollbar-width:thin;scrollbar-color:#2a2a44 transparent;
+    scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;
     position:relative;
   }
   .chart-bars::-webkit-scrollbar{height:6px;}
   .chart-bars::-webkit-scrollbar-track{background:transparent;}
-  .chart-bars::-webkit-scrollbar-thumb{background:#2a2a44;border-radius:3px;}
+  .chart-bars::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px;}
 
   .bar-group{
     display:flex;flex-direction:column;align-items:center;
@@ -186,34 +319,33 @@
   .bar-stack{
     display:flex;flex-direction:column;
     width:28px;height:140px;border-radius:4px;overflow:hidden;
-    background:rgba(255,255,255,0.03);
+    background:var(--bar-track);
     transition:transform 0.15s ease,box-shadow 0.15s ease;
   }
   .bar-group:hover .bar-stack{
     transform:translateY(-2px);
-    box-shadow:0 8px 16px -8px rgba(0,0,0,0.5);
+    box-shadow:var(--shadow);
   }
-  /* slices fill from top→bottom in DOM order, so put fail first */
-  .bar-fail{background:linear-gradient(180deg,#ef4444,#dc2626);}
-  .bar-skip{background:linear-gradient(180deg,#f59e0b,#d97706);}
-  .bar-pass{background:linear-gradient(180deg,#22c55e,#16a34a);}
+  .bar-fail{background:linear-gradient(180deg,var(--red),#b91c1c);}
+  .bar-skip{background:linear-gradient(180deg,var(--amber),#b45309);}
+  .bar-pass{background:linear-gradient(180deg,var(--green),#15803d);}
 
   .bar-label{font-size:9px;color:var(--dim);text-align:center;
     font-family:'JetBrains Mono',monospace;white-space:nowrap;}
 
-  /* custom tooltip */
+  /* tooltip */
   .chart-tooltip{
     position:fixed;z-index:100;pointer-events:none;
-    background:var(--bg-2);border:1px solid var(--line-2);
-    border-radius:8px;padding:10px 12px;
+    background:var(--tooltip-bg);border:1px solid var(--line-2);
+    border-radius:10px;padding:10px 12px;
     font-size:11px;font-family:'JetBrains Mono',monospace;
-    box-shadow:0 12px 32px -8px rgba(0,0,0,0.6);
+    box-shadow:var(--shadow-lg);
     opacity:0;transform:translateY(4px);
     transition:opacity 0.12s,transform 0.12s;
-    min-width:180px;
+    min-width:190px;color:var(--text);
   }
   .chart-tooltip.show{opacity:1;transform:translateY(0);}
-  .chart-tooltip .tt-id{color:var(--accent);font-weight:600;margin-bottom:4px;}
+  .chart-tooltip .tt-id{color:var(--accent);font-weight:700;margin-bottom:4px;}
   .chart-tooltip .tt-time{color:var(--muted);font-size:10px;margin-bottom:8px;}
   .chart-tooltip .tt-row{display:flex;justify-content:space-between;gap:14px;padding:2px 0;}
   .chart-tooltip .tt-row .lbl{color:var(--muted);}
@@ -232,10 +364,10 @@
   /* ============== FILTERS ============== */
   .filter-panel{
     background:var(--panel);border-radius:14px;padding:18px 22px;margin-bottom:18px;
-    border:1px solid var(--line);
+    border:1px solid var(--line);box-shadow:var(--shadow-sm);
   }
   .filter-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:12px;}
-  .filter-head .title{font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);}
+  .filter-head .title{font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);}
   .filter-head .reset-btn{
     background:transparent;border:1px solid var(--line-2);color:var(--muted);
     padding:6px 14px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;
@@ -254,12 +386,14 @@
   .filter-input,.filter-select{
     padding:9px 12px;border-radius:8px;border:1px solid var(--line-2);
     background:var(--bg-2);color:var(--text);font-size:12px;
-    font-family:inherit;outline:none;transition:border-color 0.15s;
+    font-family:inherit;outline:none;transition:border-color 0.15s,background 0.15s;
   }
-  .filter-input:focus,.filter-select:focus{border-color:var(--accent);}
+  .filter-input:focus,.filter-select:focus{
+    border-color:var(--accent);background:var(--panel);
+  }
   .filter-input::placeholder{color:var(--dim);}
   .filter-select{cursor:pointer;appearance:none;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%237a829a' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236b7287' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
     background-repeat:no-repeat;background-position:right 12px center;
     padding-right:30px;}
   .range-row{display:flex;gap:6px;align-items:center;}
@@ -275,12 +409,12 @@
   }
   .chip:hover{color:var(--text);border-color:var(--text);}
   .chip.active{
-    background:linear-gradient(135deg,#7c8cff,#a78bfa);
-    border-color:transparent;color:#0a0a14;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    border-color:transparent;color:#fff;
   }
-  .chip.green.active{background:var(--green);color:#0a0a14;}
-  .chip.red.active{background:var(--red);color:#0a0a14;}
-  .chip.amber.active{background:var(--amber);color:#0a0a14;}
+  .chip.green.active{background:var(--green);color:#fff;}
+  .chip.red.active{background:var(--red);color:#fff;}
+  .chip.amber.active{background:var(--amber);color:#fff;}
 
   .results-meta{
     display:flex;justify-content:space-between;align-items:center;
@@ -298,27 +432,27 @@
   /* ============== RUNS TABLE ============== */
   .runs-wrap{
     background:var(--panel);border-radius:14px;border:1px solid var(--line);
-    overflow:hidden;margin-bottom:24px;
+    overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow-sm);
   }
   table{width:100%;border-collapse:collapse;}
   thead th{
     padding:14px 18px;font-size:10px;font-weight:700;color:var(--muted);
     text-align:left;letter-spacing:0.08em;text-transform:uppercase;
-    border-bottom:1px solid var(--line);position:sticky;top:0;
-    background:var(--panel);user-select:none;cursor:pointer;
+    border-bottom:1px solid var(--line);
+    background:var(--panel-2);user-select:none;cursor:pointer;
   }
   thead th.sortable:hover{color:var(--text);}
   thead th .sort-ind{display:inline-block;margin-left:6px;color:var(--dim);font-size:9px;}
   thead th.sort-asc .sort-ind,thead th.sort-desc .sort-ind{color:var(--accent);}
   td{padding:14px 18px;font-size:13px;
-    border-bottom:1px solid var(--line);vertical-align:middle;}
-  tr.run-row{transition:background 0.1s;}
-  tr.run-row:hover td{background:rgba(124,140,255,0.04);}
+    border-bottom:1px solid var(--line);vertical-align:middle;color:var(--text);}
+  tr.run-row{transition:background 0.12s;}
+  tr.run-row:hover td{background:var(--accent-soft);}
   tr:last-child td{border:none;}
 
   .run-id{
     font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);
-    font-weight:500;
+    font-weight:600;
   }
   .pill{
     padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;
@@ -328,9 +462,9 @@
   .pill.pass{background:var(--green-bg);color:var(--green);}
   .pill.fail{background:var(--red-bg);color:var(--red);}
   .pill.mix {background:var(--amber-bg);color:var(--amber);}
-  .pill.skip{background:rgba(122,130,154,0.15);color:var(--muted);}
+  .pill.skip{background:var(--accent-soft);color:var(--muted);}
 
-  /* ============== PLATFORM BADGES ============== */
+  /* platform badges */
   .platform-badge{
     display:inline-flex;align-items:center;gap:5px;
     padding:3px 9px;border-radius:6px;
@@ -339,18 +473,34 @@
     border:1px solid transparent;
   }
   .platform-badge.android{
+    background:rgba(61,184,90,0.12);color:#15803d;
+    border-color:rgba(61,184,90,0.25);
+  }
+  [data-theme="dark"] .platform-badge.android{
     background:rgba(61,220,132,0.12);color:#3ddc84;
     border-color:rgba(61,220,132,0.25);
   }
   .platform-badge.ios{
+    background:rgba(120,120,135,0.12);color:#5a5d6e;
+    border-color:rgba(120,120,135,0.25);
+  }
+  [data-theme="dark"] .platform-badge.ios{
     background:rgba(160,160,170,0.12);color:#c8c8d0;
     border-color:rgba(160,160,170,0.25);
   }
   .platform-badge.web{
+    background:rgba(59,130,246,0.12);color:#2563eb;
+    border-color:rgba(59,130,246,0.25);
+  }
+  [data-theme="dark"] .platform-badge.web{
     background:rgba(96,165,250,0.12);color:#60a5fa;
     border-color:rgba(96,165,250,0.25);
   }
   .platform-badge.other{
+    background:rgba(139,92,246,0.12);color:#7c3aed;
+    border-color:rgba(139,92,246,0.25);
+  }
+  [data-theme="dark"] .platform-badge.other{
     background:rgba(167,139,250,0.12);color:#a78bfa;
     border-color:rgba(167,139,250,0.25);
   }
@@ -363,10 +513,10 @@
   .num.muted{color:var(--dim);}
 
   .pass-rate-cell{display:flex;align-items:center;gap:10px;}
-  .pass-rate-bar{height:5px;background:rgba(255,255,255,0.05);border-radius:3px;
+  .pass-rate-bar{height:5px;background:var(--bar-track);border-radius:3px;
     overflow:hidden;width:80px;}
   .pass-rate-fill{height:100%;border-radius:3px;
-    background:linear-gradient(90deg,var(--green),#16a34a);
+    background:linear-gradient(90deg,var(--green),#15803d);
     transition:width 0.3s;}
   .pass-rate-fill.low{background:linear-gradient(90deg,var(--red),#b91c1c);}
   .pass-rate-fill.mid{background:linear-gradient(90deg,var(--amber),#b45309);}
@@ -374,12 +524,12 @@
     color:var(--muted);min-width:34px;}
 
   .expand-btn{
-    background:rgba(124,140,255,0.1);border:1px solid rgba(124,140,255,0.2);
+    background:var(--accent-soft);border:1px solid var(--accent-soft-2);
     color:var(--accent);padding:6px 12px;border-radius:7px;cursor:pointer;
     font-size:11px;font-weight:600;font-family:inherit;
     display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;
   }
-  .expand-btn:hover{background:rgba(124,140,255,0.18);}
+  .expand-btn:hover{background:var(--accent-soft-2);}
   .expand-btn .arrow{transition:transform 0.2s;font-size:9px;}
   .expand-btn.open .arrow{transform:rotate(180deg);}
 
@@ -396,8 +546,8 @@
     background:var(--panel);border-radius:10px;padding:14px 16px;
     border-left:3px solid var(--dim);font-size:12px;
     transition:transform 0.1s;
-    min-width:0;        /* CRITICAL — lets the card shrink below content size */
-    overflow:hidden;    /* belt-and-braces: clip anything that escapes */
+    min-width:0;overflow:hidden;
+    box-shadow:var(--shadow-sm);
   }
   .test-row:hover{transform:translateX(2px);}
   .test-row.passed {border-left-color:var(--green);}
@@ -412,26 +562,20 @@
   .test-row-name .icon{flex-shrink:0;}
   .test-row-name .name-text{
     flex:1;min-width:0;
-    /* Two-line clamp by default — keeps cards uniform height */
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
     overflow:hidden;text-overflow:ellipsis;
-    word-break:break-word;
-    cursor:help;
-    transition:all 0.15s;
+    word-break:break-word;cursor:help;transition:all 0.15s;
   }
-  /* On hover OR on .show-full toggle, reveal the entire name (it'll push
-     the card taller, but it stays inside its own grid cell so no overlap) */
   .test-row:hover .name-text,
   .test-row.show-full .name-text{
-    -webkit-line-clamp:unset;
-    overflow:visible;
+    -webkit-line-clamp:unset;overflow:visible;
   }
 
   .test-row-meta{color:var(--dim);font-size:10px;
     font-family:'JetBrains Mono',monospace;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .test-row-err{color:#fca5a5;font-size:11px;margin-top:8px;
-    background:rgba(239,68,68,0.08);padding:8px 10px;border-radius:6px;
+  .test-row-err{color:var(--red);font-size:11px;margin-top:8px;
+    background:var(--red-bg);padding:8px 10px;border-radius:6px;
     border-left:2px solid var(--red);
     word-break:break-word;}
 
@@ -442,7 +586,7 @@
   .stack-toggle:hover{color:var(--accent-2);}
   .stack-arrow{font-size:9px;transition:transform 0.2s;}
   .stack-toggle.open .stack-arrow{transform:rotate(180deg);}
-  .stack-box{display:none;margin-top:8px;background:var(--bg);
+  .stack-box{display:none;margin-top:8px;background:var(--code-bg);
     border-radius:6px;padding:10px 12px;
     font-family:'JetBrains Mono',monospace;font-size:10px;
     white-space:pre-wrap;word-break:break-word;
@@ -450,8 +594,6 @@
     border:1px solid var(--line);color:var(--muted);}
   .stack-box.open{display:block;}
 
-  /* ===== Logs toggle — green variant of stack-toggle =====
-     Reuses the same toggle/arrow markup so toggleStack() works on both. */
   .logs-toggle{
     margin-top:8px;font-size:10px;color:var(--green);
     cursor:pointer;user-select:none;display:inline-flex;
@@ -459,10 +601,10 @@
     letter-spacing:0.04em;text-transform:uppercase;
     margin-right:10px;
   }
-  .logs-toggle:hover{color:#16a34a;}
+  .logs-toggle:hover{color:var(--green);opacity:0.8;}
   .logs-toggle.open .stack-arrow{transform:rotate(180deg);}
   .logs-box{
-    display:none;margin-top:8px;background:var(--bg);
+    display:none;margin-top:8px;background:var(--code-bg);
     border-radius:6px;padding:10px 12px;
     font-family:'JetBrains Mono',monospace;font-size:10.5px;
     white-space:pre-wrap;word-break:break-word;
@@ -498,15 +640,15 @@
     letter-spacing:0.04em;text-transform:uppercase;padding:4px 8px;
     border-radius:6px;transition:background 0.15s;
   }
-  .gallery-head .view-all:hover{background:rgba(124,140,255,0.1);}
+  .gallery-head .view-all:hover{background:var(--accent-soft);}
 
   .gallery-row{
     display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;
-    scrollbar-width:thin;scrollbar-color:#2a2a44 transparent;
+    scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;
   }
   .gallery-row::-webkit-scrollbar{height:6px;}
   .gallery-row::-webkit-scrollbar-track{background:transparent;}
-  .gallery-row::-webkit-scrollbar-thumb{background:#2a2a44;border-radius:3px;}
+  .gallery-row::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px;}
 
   .gallery-thumb{
     flex:0 0 auto;position:relative;
@@ -516,7 +658,7 @@
   }
   .gallery-thumb:hover{
     border-color:var(--accent);transform:translateY(-2px);
-    box-shadow:0 8px 20px -8px rgba(124,140,255,0.5);
+    box-shadow:0 8px 20px -8px rgba(91,108,255,0.4);
   }
   .gallery-thumb img{
     width:100%;height:100%;object-fit:cover;display:block;
@@ -539,7 +681,7 @@
     width:18px;height:18px;border-radius:50%;
     background:var(--red);color:#fff;
     display:grid;place-items:center;font-size:11px;font-weight:800;
-    border:2px solid var(--bg);
+    border:2px solid var(--panel);
   }
   .gallery-thumb.passed .thumb-status{background:var(--green);}
   .gallery-thumb.skipped .thumb-status{background:var(--amber);}
@@ -547,10 +689,10 @@
   .test-link{
     display:inline-block;margin-top:8px;font-size:10px;color:var(--accent);
     cursor:pointer;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
-    background:rgba(124,140,255,0.08);padding:4px 10px;border-radius:6px;
-    border:1px solid rgba(124,140,255,0.2);transition:all 0.15s;
+    background:var(--accent-soft);padding:4px 10px;border-radius:6px;
+    border:1px solid var(--accent-soft-2);transition:all 0.15s;
   }
-  .test-link:hover{background:rgba(124,140,255,0.18);}
+  .test-link:hover{background:var(--accent-soft-2);}
 
   /* ============== LIGHTBOX ============== */
   .lightbox{
@@ -566,18 +708,18 @@
   }
   .lightbox-info{display:flex;flex-direction:column;gap:2px;}
   .lightbox-title{font-size:14px;font-weight:600;color:#fff;}
-  .lightbox-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
-  .lightbox-counter{font-size:11px;color:var(--muted);
+  .lightbox-meta{font-size:11px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;}
+  .lightbox-counter{font-size:11px;color:#9ba1b3;
     font-family:'JetBrains Mono',monospace;}
   .lightbox-actions{display:flex;gap:8px;align-items:center;}
   .lb-btn{
-    width:36px;height:36px;border-radius:8px;border:1px solid var(--line-2);
-    background:rgba(255,255,255,0.04);color:var(--text);cursor:pointer;
+    width:36px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.04);color:#fff;cursor:pointer;
     display:grid;place-items:center;transition:all 0.15s;font-size:14px;
   }
-  .lb-btn:hover{background:rgba(255,255,255,0.1);border-color:var(--text);}
+  .lb-btn:hover{background:rgba(255,255,255,0.1);border-color:#fff;}
   .lb-btn:disabled{opacity:0.3;cursor:not-allowed;}
-  .lb-zoom-text{font-size:11px;color:var(--muted);
+  .lb-zoom-text{font-size:11px;color:#9ba1b3;
     font-family:'JetBrains Mono',monospace;min-width:50px;text-align:center;}
 
   .lightbox-stage{
@@ -596,7 +738,7 @@
   .lb-nav{
     position:absolute;top:50%;transform:translateY(-50%);
     width:48px;height:48px;border-radius:50%;
-    background:rgba(0,0,0,0.5);border:1px solid var(--line-2);color:#fff;
+    background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);color:#fff;
     cursor:pointer;display:grid;place-items:center;font-size:18px;
     transition:all 0.15s;backdrop-filter:blur(4px);
   }
@@ -605,9 +747,9 @@
   .lb-nav.next{right:24px;}
   .lb-hint{
     position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
-    font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    font-size:11px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;
     background:rgba(0,0,0,0.5);padding:6px 14px;border-radius:999px;
-    border:1px solid var(--line);
+    border:1px solid rgba(255,255,255,0.08);
   }
 
   /* ============== PAGINATION ============== */
@@ -619,8 +761,8 @@
     cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;
     transition:all 0.15s;
   }
-  .page-btn.active{background:linear-gradient(135deg,#7c8cff,#a78bfa);
-    color:#0a0a14;border-color:transparent;}
+  .page-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff;border-color:transparent;}
   .page-btn:hover:not(.active):not(:disabled){background:var(--panel-2);color:var(--text);}
   .page-btn:disabled{opacity:0.3;cursor:not-allowed;}
 
@@ -637,13 +779,12 @@
     color:var(--dim);font-family:'JetBrains Mono',monospace;
     border-top:1px solid var(--line);margin-top:40px;}
 
-  /* responsive */
   @media (max-width:768px){
     .container{padding:20px 16px 60px;}
     header{padding:18px 16px;}
     thead th,td{padding:10px 12px;font-size:11px;}
     .stat-card{padding:16px;}
-    .stat-card .val{font-size:26px;}
+    .stat-card .val{font-size:24px;}
     .lb-nav{width:40px;height:40px;}
     .lb-nav.prev{left:8px;}
     .lb-nav.next{right:8px;}
@@ -660,37 +801,75 @@
       <p id="lastUpdated">Loading...</p>
     </div>
   </div>
-  <span class="live-badge"><span class="dot"></span>Live</span>
+  <div class="header-right">
+    <span class="live-badge"><span class="dot"></span>Live</span>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+      <span id="themeIcon">🌙</span>
+    </button>
+  </div>
 </header>
 
 <div class="container">
 
-  <!-- ============== STATS ============== -->
-  <div class="summary-grid">
-    <div class="stat-card runs"   data-stat="all">
-      <div class="lbl">Total Runs</div>
-      <div class="val" id="statRuns">—</div>
-      <div class="delta" id="deltaRuns">—</div>
+  <!-- ============== TOP ROW: STATS + DONUT ============== -->
+  <div class="top-row">
+    <div class="summary-grid">
+      <div class="stat-card runs"   data-stat="all">
+        <div class="lbl"><span class="lbl-icon">▦</span>Total Runs</div>
+        <div class="val" id="statRuns">—</div>
+        <div class="delta" id="deltaRuns">—</div>
+      </div>
+      <div class="stat-card tests"  data-stat="all">
+        <div class="lbl"><span class="lbl-icon">∑</span>Total Tests</div>
+        <div class="val" id="statTests">—</div>
+        <div class="delta" id="deltaTests">—</div>
+      </div>
+      <div class="stat-card passed" data-stat="pass">
+        <div class="lbl"><span class="lbl-icon">✓</span>Passed</div>
+        <div class="val" id="statPassed">—</div>
+        <div class="delta" id="deltaPassed">click to filter</div>
+      </div>
+      <div class="stat-card failed" data-stat="fail">
+        <div class="lbl"><span class="lbl-icon">✗</span>Failed</div>
+        <div class="val" id="statFailed">—</div>
+        <div class="delta" id="deltaFailed">click to filter</div>
+      </div>
+      <div class="stat-card rate">
+        <div class="lbl"><span class="lbl-icon">%</span>Avg Pass Rate</div>
+        <div class="val" id="statRate">—</div>
+        <div class="delta" id="deltaRate">—</div>
+      </div>
     </div>
-    <div class="stat-card tests"  data-stat="all">
-      <div class="lbl">Total Tests</div>
-      <div class="val" id="statTests">—</div>
-      <div class="delta" id="deltaTests">—</div>
-    </div>
-    <div class="stat-card passed" data-stat="pass">
-      <div class="lbl">Passed</div>
-      <div class="val" id="statPassed">—</div>
-      <div class="delta" id="deltaPassed">click to filter</div>
-    </div>
-    <div class="stat-card failed" data-stat="fail">
-      <div class="lbl">Failed</div>
-      <div class="val" id="statFailed">—</div>
-      <div class="delta" id="deltaFailed">click to filter</div>
-    </div>
-    <div class="stat-card rate">
-      <div class="lbl">Avg Pass Rate</div>
-      <div class="val" id="statRate">—</div>
-      <div class="delta" id="deltaRate">—</div>
+
+    <!-- Donut chart card -->
+    <div class="donut-card">
+      <div class="donut-head">Overall Distribution</div>
+      <div class="donut-wrap">
+        <div class="donut-svg" id="donutWrap">
+          <svg viewBox="0 0 120 120" id="donutSvg">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="var(--bar-track)" stroke-width="14"/>
+            <g id="donutSlices"></g>
+          </svg>
+          <div class="donut-center">
+            <div class="dc-val" id="donutCenterVal">—</div>
+            <div class="dc-lbl">Pass Rate</div>
+          </div>
+        </div>
+        <div class="donut-legend" id="donutLegend">
+          <div class="donut-leg-row">
+            <div class="left"><div class="swatch" style="background:var(--green)"></div><span class="name">Passed</span></div>
+            <span class="val" id="donutPass">—</span>
+          </div>
+          <div class="donut-leg-row">
+            <div class="left"><div class="swatch" style="background:var(--red)"></div><span class="name">Failed</span></div>
+            <span class="val" id="donutFail">—</span>
+          </div>
+          <div class="donut-leg-row">
+            <div class="left"><div class="swatch" style="background:var(--amber)"></div><span class="name">Skipped</span></div>
+            <span class="val" id="donutSkip">—</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -707,9 +886,9 @@
           <button class="vt-btn"        data-view="line" onclick="setChartView('line',this)">Line</button>
         </div>
         <div class="legend" id="chartLegend">
-          <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Passed</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Failed</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Skipped</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Passed</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Failed</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Skipped</div>
         </div>
       </div>
     </div>
@@ -871,18 +1050,35 @@
 
 <script>
 /* ============================================================
+ *  THEME TOGGLE
+ * ============================================================ */
+(function initTheme(){
+  const saved = localStorage.getItem('masflow-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeIcon').textContent = saved === 'light' ? '🌙' : '☀️';
+})();
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('masflow-theme', next);
+  document.getElementById('themeIcon').textContent = next === 'light' ? '🌙' : '☀️';
+  // Re-render trend chart so SVG strokes pick up new theme colors
+  if (state.allRuns.length) renderTrend(state.filteredRuns);
+});
+
+/* ============================================================
  *  STATE
  * ============================================================ */
 const state = {
-  allRuns:       [],   // raw, deduped, sorted newest-first
-  filteredRuns:  [],   // after filters
+  allRuns:       [],
+  filteredRuns:  [],
   sortKey:       'time',
   sortDir:       'desc',
   currentPage:   1,
   pageSize:      20,
   status:        'all',
-  chartView:     'bars',   // 'bars' | 'line'
-  // lightbox
+  chartView:     'bars',
   lbList:        [],
   lbIndex:       0,
   lbZoom:        1,
@@ -893,13 +1089,11 @@ const state = {
 /* ============================================================
  *  LOAD
  * ============================================================ */
-fetch('history.json?t=' + Date.now())
+fetch('history?t=' + Date.now())
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(runs => {
     const seen = new Set();
     runs = runs.filter(r => seen.has(r.runId) ? false : (seen.add(r.runId), true));
-    // Normalize platform field. Missing/empty → ANDROID (legacy default since
-    // this project started Android-only). Unknown values → OTHER.
     const KNOWN = new Set(['ANDROID','IOS','WEB','OTHER']);
     runs.forEach(r => {
       const p = (r.platform || '').toString().trim().toUpperCase();
@@ -909,7 +1103,8 @@ fetch('history.json?t=' + Date.now())
     state.allRuns = runs;
     populateMethodFilter(runs);
     renderStats(runs);
-    applyFilters(); // also renders the chart against the (initially unfiltered) set
+    renderDonut(runs);
+    applyFilters();
   })
   .catch(err => {
     console.error('load failed:', err);
@@ -922,7 +1117,7 @@ fetch('history.json?t=' + Date.now())
   });
 
 /* ============================================================
- *  STATS  +  TREND
+ *  STATS
  * ============================================================ */
 function renderStats(runs){
   const totalRuns   = runs.length;
@@ -941,13 +1136,64 @@ function renderStats(runs){
   document.getElementById('footerText').textContent =
     `MAS Flow Dashboard · ${totalRuns} runs · ${totalTests} tests · powered by Appium + TestNG`;
 
-  // little context lines
   const failedRuns = runs.filter(r => r.failed > 0).length;
   const cleanRuns  = runs.filter(r => r.failed === 0 && r.skipped === 0).length;
   document.getElementById('deltaRuns').textContent   = `${cleanRuns} clean · ${failedRuns} with issues`;
   document.getElementById('deltaTests').textContent  = `${totalPassed + totalFailed} executed`;
   document.getElementById('deltaRate').textContent   =
     avgRate >= 80 ? 'healthy' : avgRate >= 50 ? 'needs attention' : 'critical';
+}
+
+/* ============================================================
+ *  DONUT  (overall pass/fail/skip distribution)
+ * ============================================================ */
+function renderDonut(runs){
+  const totalPassed  = runs.reduce((s,r) => s + r.passed,  0);
+  const totalFailed  = runs.reduce((s,r) => s + r.failed,  0);
+  const totalSkipped = runs.reduce((s,r) => s + r.skipped, 0);
+  const total = totalPassed + totalFailed + totalSkipped;
+
+  document.getElementById('donutPass').textContent = totalPassed;
+  document.getElementById('donutFail').textContent = totalFailed;
+  document.getElementById('donutSkip').textContent = totalSkipped;
+  const pct = total ? Math.round(totalPassed * 100 / total) : 0;
+  document.getElementById('donutCenterVal').textContent = pct + '%';
+
+  // Build SVG donut slices using stroke-dasharray on a circle
+  const slices = document.getElementById('donutSlices');
+  slices.innerHTML = '';
+  if (!total){ return; }
+
+  const r = 48, cx = 60, cy = 60;
+  const C = 2 * Math.PI * r; // circumference
+
+  const segments = [
+    {value: totalPassed,  color:'var(--green)'},
+    {value: totalFailed,  color:'var(--red)'},
+    {value: totalSkipped, color:'var(--amber)'},
+  ].filter(s => s.value > 0);
+
+  let offset = 0;
+  segments.forEach(seg => {
+    const frac = seg.value / total;
+    const len = frac * C;
+    // small gap between slices (only if more than one segment)
+    const gap = segments.length > 1 ? 1.5 : 0;
+    const dashLen = Math.max(0, len - gap);
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', cx);
+    c.setAttribute('cy', cy);
+    c.setAttribute('r', r);
+    c.setAttribute('fill', 'none');
+    c.setAttribute('stroke', seg.color);
+    c.setAttribute('stroke-width', 14);
+    c.setAttribute('stroke-dasharray', `${dashLen} ${C - dashLen}`);
+    c.setAttribute('stroke-dashoffset', -offset);
+    c.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+    c.style.transition = 'stroke-dasharray 0.4s ease';
+    slices.appendChild(c);
+    offset += len;
+  });
 }
 
 /* ============================================================
@@ -963,18 +1209,18 @@ function renderTrend(runs){
   if (state.chartView === 'bars'){
     title.textContent = 'Pass / Fail / Skip — % per run';
     legend.innerHTML = `
-      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Passed</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Failed</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Skipped</div>`;
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Passed</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Failed</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Skipped</div>`;
     barsEl.style.display = '';
     lineEl.style.display = 'none';
     renderBars(runs, meta);
   } else {
     title.textContent = 'Daily totals — passed / failed / executed';
     legend.innerHTML = `
-      <div class="legend-item"><div class="legend-dot" style="background:#7c8cff"></div>Total executed</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Passed</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Failed</div>`;
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Total executed</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Passed</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Failed</div>`;
     barsEl.style.display = 'none';
     lineEl.style.display = '';
     renderLine(runs, meta);
@@ -988,7 +1234,7 @@ function setChartView(view, btn){
   renderTrend(state.filteredRuns);
 }
 
-/* ---------- BAR view (percentage stacks, per run) ---------- */
+/* ---------- BAR view ---------- */
 function renderBars(runs, meta){
   const el = document.getElementById('trendChart');
   const ordered = [...runs].sort((a,b) => a.epochMs - b.epochMs).slice(-50);
@@ -1051,11 +1297,10 @@ function renderBars(runs, meta){
   });
 }
 
-/* ---------- LINE view (daily aggregates) ---------- */
+/* ---------- LINE view ---------- */
 function renderLine(runs, meta){
   const el = document.getElementById('trendLine');
 
-  // bucket runs by calendar day
   const byDay = new Map();
   runs.forEach(r => {
     const dt = new Date(r.epochMs);
@@ -1063,10 +1308,7 @@ function renderLine(runs, meta){
                 String(dt.getMonth()+1).padStart(2,'0') + '-' +
                 String(dt.getDate()).padStart(2,'0');
     if (!byDay.has(key)){
-      byDay.set(key, {
-        key, dt, runs: 0,
-        passed: 0, failed: 0, skipped: 0, total: 0
-      });
+      byDay.set(key, {key, dt, runs:0, passed:0, failed:0, skipped:0, total:0});
     }
     const b = byDay.get(key);
     b.runs    += 1;
@@ -1088,26 +1330,22 @@ function renderLine(runs, meta){
     return;
   }
 
-  // SVG dimensions (responsive width via viewBox)
   const W = 1000, H = 280;
   const PAD_L = 50, PAD_R = 30, PAD_T = 20, PAD_B = 50;
   const innerW = W - PAD_L - PAD_R;
   const innerH = H - PAD_T - PAD_B;
 
   const maxY = Math.max(...days.map(d => d.total), 1);
-  // round up to a nice number for axis ticks
   const niceMax = niceCeil(maxY);
   const tickCount = 5;
   const ticks = [];
   for (let i = 0; i <= tickCount; i++) ticks.push(Math.round(niceMax * i / tickCount));
 
-  // x/y scales
   const xOf = i => days.length === 1
     ? PAD_L + innerW / 2
     : PAD_L + (i / (days.length - 1)) * innerW;
   const yOf = v => PAD_T + innerH - (v / niceMax) * innerH;
 
-  // build path strings
   const linePath = (key) => days.map((d, i) =>
     (i === 0 ? 'M' : 'L') + xOf(i) + ',' + yOf(d[key])
   ).join(' ');
@@ -1116,22 +1354,24 @@ function renderLine(runs, meta){
     days.map((d, i) => 'L' + xOf(i) + ',' + yOf(d[key])).join(' ') +
     ` L${xOf(days.length - 1)},${yOf(0)} Z`;
 
-  // x-axis labels — thin them out if too many days
   const labelStride = Math.max(1, Math.ceil(days.length / 12));
+
+  // Resolve actual color values from CSS variables for SVG stroke/fill
+  const cs = getComputedStyle(document.documentElement);
+  const cAccent = cs.getPropertyValue('--accent').trim() || '#5b6cff';
+  const cGreen  = cs.getPropertyValue('--green').trim()  || '#16a34a';
+  const cRed    = cs.getPropertyValue('--red').trim()    || '#dc2626';
 
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
 
-  // grid lines + y-axis ticks
   ticks.forEach(t => {
     const y = yOf(t);
     svg += `<line class="grid-line" x1="${PAD_L}" x2="${W - PAD_R}" y1="${y}" y2="${y}"/>`;
     svg += `<text class="axis-text" x="${PAD_L - 8}" y="${y + 3}" text-anchor="end">${t}</text>`;
   });
 
-  // x-axis baseline
   svg += `<line class="axis-line" x1="${PAD_L}" x2="${W - PAD_R}" y1="${PAD_T + innerH}" y2="${PAD_T + innerH}"/>`;
 
-  // x-axis labels
   days.forEach((d, i) => {
     if (i % labelStride !== 0 && i !== days.length - 1) return;
     const x = xOf(i);
@@ -1139,28 +1379,23 @@ function renderLine(runs, meta){
     svg += `<text class="axis-text" x="${x}" y="${H - PAD_B + 18}" text-anchor="middle">${lbl}</text>`;
   });
 
-  // hover guideline
   svg += `<line class="hover-line" id="hoverGuide" x1="0" x2="0" y1="${PAD_T}" y2="${PAD_T + innerH}"/>`;
 
-  // areas (subtle fills under each line)
-  svg += `<path class="data-area" d="${areaPath('total')}"  fill="#7c8cff"/>`;
-  svg += `<path class="data-area" d="${areaPath('passed')}" fill="#22c55e"/>`;
-  svg += `<path class="data-area" d="${areaPath('failed')}" fill="#ef4444"/>`;
+  svg += `<path class="data-area" d="${areaPath('total')}"  fill="${cAccent}"/>`;
+  svg += `<path class="data-area" d="${areaPath('passed')}" fill="${cGreen}"/>`;
+  svg += `<path class="data-area" d="${areaPath('failed')}" fill="${cRed}"/>`;
 
-  // lines
-  svg += `<path class="data-line" d="${linePath('total')}"  stroke="#7c8cff"/>`;
-  svg += `<path class="data-line" d="${linePath('passed')}" stroke="#22c55e"/>`;
-  svg += `<path class="data-line" d="${linePath('failed')}" stroke="#ef4444"/>`;
+  svg += `<path class="data-line" d="${linePath('total')}"  stroke="${cAccent}"/>`;
+  svg += `<path class="data-line" d="${linePath('passed')}" stroke="${cGreen}"/>`;
+  svg += `<path class="data-line" d="${linePath('failed')}" stroke="${cRed}"/>`;
 
-  // dots — total/passed/failed at every day
   days.forEach((d, i) => {
     const x = xOf(i);
-    svg += `<circle class="dot" cx="${x}" cy="${yOf(d.total)}"  r="3.5" fill="#7c8cff" data-i="${i}" data-k="total"/>`;
-    svg += `<circle class="dot" cx="${x}" cy="${yOf(d.passed)}" r="3.5" fill="#22c55e" data-i="${i}" data-k="passed"/>`;
-    svg += `<circle class="dot" cx="${x}" cy="${yOf(d.failed)}" r="3.5" fill="#ef4444" data-i="${i}" data-k="failed"/>`;
+    svg += `<circle class="dot" cx="${x}" cy="${yOf(d.total)}"  r="3.5" fill="${cAccent}" data-i="${i}"/>`;
+    svg += `<circle class="dot" cx="${x}" cy="${yOf(d.passed)}" r="3.5" fill="${cGreen}"  data-i="${i}"/>`;
+    svg += `<circle class="dot" cx="${x}" cy="${yOf(d.failed)}" r="3.5" fill="${cRed}"    data-i="${i}"/>`;
   });
 
-  // invisible vertical hit zones, one per day, for cleaner hover
   days.forEach((d, i) => {
     const x = xOf(i);
     const halfBand = days.length > 1 ? innerW / (days.length - 1) / 2 : innerW / 2;
@@ -1172,7 +1407,6 @@ function renderLine(runs, meta){
   svg += `</svg>`;
   el.innerHTML = svg;
 
-  // ---------- hover tooltip + guideline ----------
   const tip = document.getElementById('chartTooltip');
   const guide = el.querySelector('#hoverGuide');
   const wrap = el;
@@ -1212,7 +1446,6 @@ function renderLine(runs, meta){
   });
 }
 
-// rounds 14 → 15, 47 → 50, 380 → 400, etc. — for nice y-axis tops
 function niceCeil(n){
   if (n <= 5)   return 5;
   if (n <= 10)  return 10;
@@ -1276,35 +1509,22 @@ function applyFilters(){
   const dateToMs = dateTo ? new Date(dateTo + 'T23:59:59').getTime() : null;
 
   state.filteredRuns = state.allRuns.filter(r => {
-    // status
     if (state.status === 'pass' && r.failed > 0)              return false;
     if (state.status === 'fail' && r.failed === 0)            return false;
     if (state.status === 'skip' && r.skipped === 0)           return false;
-
-    // platform
     if (platform && r.platform !== platform)                  return false;
-
-    // date
     if (dateFrMs !== null && r.epochMs < dateFrMs)            return false;
     if (dateToMs !== null && r.epochMs > dateToMs)            return false;
-
-    // pass rate
     if (rateMin !== null && r.passRate < rateMin)             return false;
     if (rateMax !== null && r.passRate > rateMax)             return false;
-
-    // total
     if (totMin !== null && r.total < totMin)                  return false;
     if (totMax !== null && r.total > totMax)                  return false;
-
-    // method
     if (method && !(r.tests || []).some(t => t.method === method)) return false;
 
-    // screenshots
     const hasShots = (r.tests || []).some(t => t.screenshotUrl);
     if (shotsF === 'yes' && !hasShots)                        return false;
     if (shotsF === 'no'  &&  hasShots)                        return false;
 
-    // text search — runId, timestamp, methods, errors, logs, platform
     if (q){
       const hay = (r.runId + ' ' + r.timestamp + ' ' + (r.platform || '') + ' ' +
         (r.tests || []).map(t =>
@@ -1318,8 +1538,8 @@ function applyFilters(){
 
   state.currentPage = 1;
   applySort();
-  // chart reflects the filtered set — chronological order is restored inside renderTrend
   renderTrend(state.filteredRuns);
+  renderDonut(state.filteredRuns);
 }
 
 function applySort(){
@@ -1339,7 +1559,6 @@ function sortByCol(col){
   } else {
     state.sortKey = k; state.sortDir = 'desc';
   }
-  // sync top dropdown if applicable
   const dropVal = `${k}-${state.sortDir}`;
   const sel = document.getElementById('sortBy');
   if ([...sel.options].some(o => o.value === dropVal)) sel.value = dropVal;
@@ -1372,7 +1591,6 @@ function renderTable(){
   document.getElementById('resultCount').textContent = runs.length;
   document.getElementById('totalCount').textContent  = state.allRuns.length;
 
-  // header indicators
   document.querySelectorAll('thead th').forEach(th => th.classList.remove('sort-asc','sort-desc'));
 
   if (!runs.length){
@@ -1393,7 +1611,6 @@ function renderTable(){
 
   tbody.innerHTML = slice.map((run, i) => {
     const idx = start + i;
-    const filter = run.failed > 0 ? 'fail' : run.skipped > 0 ? 'skip' : 'pass';
     const pill = run.failed  > 0 ? `<span class="pill mix">⚠ Mixed</span>`
               : run.skipped > 0 ? `<span class="pill skip">⏭ Skipped</span>`
               : `<span class="pill pass">✓ All Pass</span>`;
@@ -1432,7 +1649,6 @@ function renderTable(){
   renderPagination(runs.length);
 }
 
-/* renders a small colored pill for the platform value */
 function platformBadge(p){
   const platform = (p || 'ANDROID').toUpperCase();
   const config = {
@@ -1447,7 +1663,6 @@ function platformBadge(p){
 }
 
 function buildGalleryStrip(run, idx){
-  // collect every test that has a screenshot, in original order
   const shots = (run.tests || [])
     .map((t, ti) => ({t, ti}))
     .filter(x => x.t.screenshotUrl);
@@ -1486,7 +1701,6 @@ function buildTestsHtml(run, idx){
     const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
     const errHtml = errMsg ? `<div class="test-row-err">${escHtml(errMsg)}</div>` : '';
 
-    // ----- Logs toggle (green) — shown for any test that has a logs field -----
     const logsId = `logs_${idx}_${ti}`;
     const logsHtml = t.logs ? `
       <div class="logs-toggle" onclick="toggleStack('${logsId}',this)">
@@ -1494,7 +1708,6 @@ function buildTestsHtml(run, idx){
       </div>
       <div class="logs-box" id="${logsId}">${escHtml(t.logs)}</div>` : '';
 
-    // ----- Stack trace toggle (blue) — shown for failed tests -----
     const stackId = `stack_${idx}_${ti}`;
     const stackHtml = t.stackTrace ? `
       <div class="stack-toggle" onclick="toggleStack('${stackId}',this)">
@@ -1502,8 +1715,6 @@ function buildTestsHtml(run, idx){
       </div>
       <div class="stack-box" id="${stackId}">${escHtml(t.stackTrace)}</div>` : '';
 
-    // compact link instead of inline thumbnail — the gallery strip above
-    // already shows all screenshots for this run.
     const shotHtml = t.screenshotUrl
       ? `<div><span class="test-link" onclick="openLightbox(${idx},${ti})">📸 View screenshot</span></div>`
       : '';
@@ -1541,7 +1752,6 @@ function renderPagination(total){
   };
 
   let html = btn('‹', cur - 1, {disabled: cur === 1});
-  // window of pages
   const window = 5;
   let from = Math.max(1, cur - 2);
   let to   = Math.min(pages, from + window - 1);
@@ -1570,7 +1780,6 @@ function toggleDetail(idx, btn){
   }
 }
 
-/* Used by both stack-trace and logs toggles — same show/hide behavior. */
 function toggleStack(id, el){
   const box = document.getElementById(id);
   if (box) box.classList.toggle('open');
@@ -1579,11 +1788,8 @@ function toggleStack(id, el){
 
 /* ============================================================
  *  LIGHTBOX
- *  - Builds list of all screenshots from currently filtered runs
- *  - Keyboard nav, zoom (wheel + buttons), pan (drag), download
  * ============================================================ */
 function openLightbox(runIdx, testIdx){
-  // build full list from filtered runs
   state.lbList = [];
   state.filteredRuns.forEach(run => {
     (run.tests || []).forEach(t => {
@@ -1598,7 +1804,6 @@ function openLightbox(runIdx, testIdx){
       }
     });
   });
-  // find the index that matches our clicked thumb
   const target = state.filteredRuns[runIdx]?.tests?.[testIdx];
   state.lbIndex = target ? Math.max(0, state.lbList.findIndex(s =>
     s.url === target.screenshotUrl && s.method === target.method)) : 0;
@@ -1641,7 +1846,6 @@ function applyTransform(){
   img.style.transform = `translate(${state.lbPanX}px,${state.lbPanY}px) scale(${state.lbZoom})`;
 }
 
-/* lightbox event wiring */
 document.getElementById('lbClose').onclick    = closeLightbox;
 document.getElementById('lbPrev').onclick     = lbPrev;
 document.getElementById('lbNext').onclick     = lbNext;
@@ -1661,14 +1865,12 @@ document.getElementById('lbOpen').onclick = () => {
   window.open(item.url, '_blank');
 };
 
-// scroll to zoom
 document.getElementById('lbStage').addEventListener('wheel', e => {
   e.preventDefault();
   const factor = e.deltaY < 0 ? 1.1 : 1/1.1;
   setZoom(state.lbZoom * factor);
 }, {passive:false});
 
-// drag to pan
 let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
 const stage = document.getElementById('lbStage');
 stage.addEventListener('mousedown', e => {
@@ -1688,7 +1890,6 @@ window.addEventListener('mouseup', () => {
   dragging = false; stage.classList.remove('grabbing');
 });
 
-// keyboard
 window.addEventListener('keydown', e => {
   if (!document.getElementById('lightbox').classList.contains('active')) return;
   if (e.key === 'Escape')      closeLightbox();
@@ -1700,7 +1901,6 @@ window.addEventListener('keydown', e => {
   else if (e.key.toLowerCase() === 'd') document.getElementById('lbDownload').click();
 });
 
-// click backdrop to close
 stage.addEventListener('click', e => {
   if (e.target === stage) closeLightbox();
 });
