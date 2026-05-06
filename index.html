@@ -1089,7 +1089,7 @@ const state = {
 /* ============================================================
  *  LOAD
  * ============================================================ */
-fetch('history?t=' + Date.now())
+fetch('history.json?t=' + Date.now())
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(runs => {
     const seen = new Set();
