@@ -1024,28 +1024,54 @@
     border-top:1px solid rgba(255,255,255,0.04);
   }
 
-  /* ============== CLOSE-RUN HEADER (above master/detail) ============== */
+  /* ============== CLOSE-RUN BAR (in-flow, sticky-left) ============== */
   .md-close-bar{
     display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:14px;padding:8px 12px;
+    margin-bottom:14px;padding:10px 14px;
     background:var(--accent-soft);border:1px solid var(--accent-soft-2);
-    border-radius:8px;
+    border-radius:8px;gap:12px;
+    position:sticky;left:22px;
+    width:calc(100vw - 100px);max-width:1400px;
+    z-index:5;
   }
   .md-close-bar .info{
     font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;
-    display:flex;align-items:center;gap:8px;
+    display:flex;align-items:center;gap:8px;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .md-close-bar .info strong{color:var(--accent);}
   .md-close-bar .close-btn{
-    background:transparent;border:1px solid var(--line-2);color:var(--text);
-    padding:6px 14px;border-radius:7px;cursor:pointer;
-    font-size:11px;font-weight:600;font-family:inherit;
+    background:var(--red-bg);border:1px solid var(--red);color:var(--red);
+    padding:8px 16px;border-radius:7px;cursor:pointer;
+    font-size:12px;font-weight:700;font-family:inherit;
     display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;
-    letter-spacing:0.04em;text-transform:uppercase;
+    letter-spacing:0.04em;text-transform:uppercase;flex-shrink:0;
+    box-shadow:0 2px 8px -2px rgba(220,38,38,0.3);
   }
   .md-close-bar .close-btn:hover{
-    background:var(--red-bg);border-color:var(--red);color:var(--red);
+    background:var(--red);color:#fff;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px -2px rgba(220,38,38,0.5);
   }
+
+  /* Floating close button — always pinned to top-right of the viewport
+     when ANY run-detail panel is open. Cannot be overflowed. */
+  #floatingCloseBtn{
+    display:none;
+    position:fixed;top:80px;right:20px;
+    background:var(--red);color:#fff;
+    border:none;padding:10px 18px;border-radius:24px;
+    font-size:12px;font-weight:700;font-family:inherit;
+    letter-spacing:0.05em;text-transform:uppercase;
+    cursor:pointer;z-index:9000;
+    box-shadow:0 6px 20px -4px rgba(220,38,38,0.6);
+    transition:transform 0.15s,box-shadow 0.15s;
+  }
+  #floatingCloseBtn:hover{
+    transform:translateY(-2px) scale(1.04);
+    box-shadow:0 10px 28px -4px rgba(220,38,38,0.7);
+  }
+  #floatingCloseBtn.show{display:inline-flex;align-items:center;gap:8px;}
 
   /* ============== PAGINATION ============== */
   .pagination{display:flex;justify-content:center;
@@ -1351,6 +1377,10 @@
 </div>
 
 <footer id="footerText">MAS Flow Dashboard</footer>
+
+<button id="floatingCloseBtn" onclick="closeAllRuns()" title="Close run (Esc)">
+  ✕ Close run
+</button>
 
 <script>
 /* ============================================================
@@ -2356,6 +2386,7 @@ function toggleDetail(idx, btn){
     row.classList.toggle('open');
     btn.classList.toggle('open');
   }
+  updateFloatingClose();
 }
 
 /** Closes a run's master/detail panel and resets the original toggle button. */
@@ -2367,9 +2398,26 @@ function closeDetail(idx){
   if (runRow){
     const btn = runRow.querySelector('.expand-btn');
     if (btn) btn.classList.remove('open');
-    // Scroll the run row back into view in case the panel was tall
     runRow.scrollIntoView({behavior: 'smooth', block: 'nearest'});
   }
+  updateFloatingClose();
+}
+
+/** Closes every open run-detail panel. Triggered by the floating button
+    and by the Escape key. */
+function closeAllRuns(){
+  document.querySelectorAll('tr.run-detail.open').forEach(row => {
+    const m = row.id.match(/^detail_(\d+)$/);
+    if (m) closeDetail(Number(m[1]));
+  });
+}
+
+/** Show the floating close button whenever ANY run panel is open. */
+function updateFloatingClose(){
+  const btn = document.getElementById('floatingCloseBtn');
+  if (!btn) return;
+  const anyOpen = document.querySelectorAll('tr.run-detail.open').length > 0;
+  btn.classList.toggle('show', anyOpen);
 }
 
 function toggleStack(id, el){
