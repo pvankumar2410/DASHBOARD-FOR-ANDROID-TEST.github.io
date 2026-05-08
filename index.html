@@ -615,6 +615,39 @@
   }
   .logs-box.open{display:block;}
 
+  /* ============== TEST-ROW MINI SCREENSHOT GRID ============== */
+  .test-shots{
+    margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;
+  }
+  .test-shot-mini{
+    position:relative;width:54px;height:54px;border-radius:6px;
+    overflow:hidden;border:1.5px solid var(--line-2);background:var(--bg-2);
+    cursor:zoom-in;flex-shrink:0;transition:all 0.15s;
+  }
+  .test-shot-mini:hover{
+    border-color:var(--accent);
+    box-shadow:0 4px 10px -4px rgba(91,108,255,0.4);
+    transform:translateY(-1px);
+  }
+  .test-shot-mini img{
+    width:100%;height:100%;object-fit:cover;display:block;background:#fff;
+  }
+  .test-shot-mini .tsm-num{
+    position:absolute;top:2px;left:2px;
+    background:rgba(0,0,0,0.7);color:#fff;
+    font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;
+    padding:1px 5px;border-radius:4px;line-height:1.3;
+  }
+  .test-shot-mini .tsm-tip{
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(transparent,rgba(0,0,0,0.85));
+    color:#fff;font-size:8.5px;
+    padding:8px 4px 3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    opacity:0;transition:opacity 0.15s;
+  }
+  .test-shot-mini:hover .tsm-tip{opacity:1;}
+
   /* ============== GALLERY STRIP ============== */
   .gallery-strip{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -676,6 +709,11 @@
     font-size:9px;color:#fff;font-weight:600;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
+  .gallery-thumb .thumb-label{
+    font-size:8.5px;color:#cbd1e0;font-weight:500;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    margin-top:1px;
+  }
   .gallery-thumb .thumb-status{
     position:absolute;top:6px;right:6px;
     width:18px;height:18px;border-radius:50%;
@@ -685,6 +723,12 @@
   }
   .gallery-thumb.passed .thumb-status{background:var(--green);}
   .gallery-thumb.skipped .thumb-status{background:var(--amber);}
+  .gallery-thumb .thumb-badge{
+    position:absolute;top:6px;left:6px;
+    background:rgba(0,0,0,0.65);color:#fff;
+    font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;
+    padding:1px 6px;border-radius:4px;line-height:1.4;
+  }
 
   .test-link{
     display:inline-block;margin-top:8px;font-size:10px;color:var(--accent);
@@ -706,9 +750,14 @@
     padding:14px 24px;border-bottom:1px solid rgba(255,255,255,0.08);
     background:rgba(0,0,0,0.4);
   }
-  .lightbox-info{display:flex;flex-direction:column;gap:2px;}
-  .lightbox-title{font-size:14px;font-weight:600;color:#fff;}
-  .lightbox-meta{font-size:11px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;}
+  .lightbox-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .lightbox-title{font-size:14px;font-weight:600;color:#fff;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lightbox-title .lb-label{
+    color:#a78bfa;margin-left:8px;font-weight:500;font-size:12px;
+  }
+  .lightbox-meta{font-size:11px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .lightbox-counter{font-size:11px;color:#9ba1b3;
     font-family:'JetBrains Mono',monospace;}
   .lightbox-actions{display:flex;gap:8px;align-items:center;}
@@ -910,7 +959,7 @@
       <div class="filter-field">
         <label>Search</label>
         <input class="filter-input" id="f-search" type="text"
-               placeholder="Run ID, timestamp, method, error, log content..."
+               placeholder="Run ID, timestamp, method, error, log, screenshot label..."
                oninput="applyFilters()"/>
       </div>
 
@@ -1063,7 +1112,6 @@ document.getElementById('themeToggle').addEventListener('click', () => {
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('masflow-theme', next);
   document.getElementById('themeIcon').textContent = next === 'light' ? '🌙' : '☀️';
-  // Re-render trend chart so SVG strokes pick up new theme colors
   if (state.allRuns.length) renderTrend(state.filteredRuns);
 });
 
@@ -1085,6 +1133,38 @@ const state = {
   lbPanX:        0,
   lbPanY:        0,
 };
+
+/* ============================================================
+ *  SCREENSHOT NORMALIZATION
+ *  Returns an array of {url, label, fileName} for a test, merging:
+ *    - new "screenshots" array (preferred, multiple shots)
+ *    - legacy "screenshotUrl" single value (added if not already present)
+ * ============================================================ */
+function getShots(t){
+  const out = [];
+  const seen = new Set();
+  if (Array.isArray(t.screenshots)){
+    t.screenshots.forEach(s => {
+      const url = s && (s.url || s.fileName);
+      if (url && !seen.has(url)){
+        seen.add(url);
+        out.push({
+          url:      url,
+          label:    s.label || '',
+          fileName: s.fileName || ''
+        });
+      }
+    });
+  }
+  if (t.screenshotUrl && !seen.has(t.screenshotUrl)){
+    out.push({
+      url:      t.screenshotUrl,
+      label:    out.length ? '' : 'failure',
+      fileName: ''
+    });
+  }
+  return out;
+}
 
 /* ============================================================
  *  LOAD
@@ -1145,7 +1225,7 @@ function renderStats(runs){
 }
 
 /* ============================================================
- *  DONUT  (overall pass/fail/skip distribution)
+ *  DONUT
  * ============================================================ */
 function renderDonut(runs){
   const totalPassed  = runs.reduce((s,r) => s + r.passed,  0);
@@ -1159,13 +1239,12 @@ function renderDonut(runs){
   const pct = total ? Math.round(totalPassed * 100 / total) : 0;
   document.getElementById('donutCenterVal').textContent = pct + '%';
 
-  // Build SVG donut slices using stroke-dasharray on a circle
   const slices = document.getElementById('donutSlices');
   slices.innerHTML = '';
   if (!total){ return; }
 
   const r = 48, cx = 60, cy = 60;
-  const C = 2 * Math.PI * r; // circumference
+  const C = 2 * Math.PI * r;
 
   const segments = [
     {value: totalPassed,  color:'var(--green)'},
@@ -1177,7 +1256,6 @@ function renderDonut(runs){
   segments.forEach(seg => {
     const frac = seg.value / total;
     const len = frac * C;
-    // small gap between slices (only if more than one segment)
     const gap = segments.length > 1 ? 1.5 : 0;
     const dashLen = Math.max(0, len - gap);
     const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
@@ -1197,7 +1275,7 @@ function renderDonut(runs){
 }
 
 /* ============================================================
- *  TREND CHART  (bars + line, both filter-aware)
+ *  TREND CHART
  * ============================================================ */
 function renderTrend(runs){
   const meta = document.getElementById('chartMeta');
@@ -1234,7 +1312,6 @@ function setChartView(view, btn){
   renderTrend(state.filteredRuns);
 }
 
-/* ---------- BAR view ---------- */
 function renderBars(runs, meta){
   const el = document.getElementById('trendChart');
   const ordered = [...runs].sort((a,b) => a.epochMs - b.epochMs).slice(-50);
@@ -1297,7 +1374,6 @@ function renderBars(runs, meta){
   });
 }
 
-/* ---------- LINE view ---------- */
 function renderLine(runs, meta){
   const el = document.getElementById('trendLine');
 
@@ -1356,7 +1432,6 @@ function renderLine(runs, meta){
 
   const labelStride = Math.max(1, Math.ceil(days.length / 12));
 
-  // Resolve actual color values from CSS variables for SVG stroke/fill
   const cs = getComputedStyle(document.documentElement);
   const cAccent = cs.getPropertyValue('--accent').trim() || '#5b6cff';
   const cGreen  = cs.getPropertyValue('--green').trim()  || '#16a34a';
@@ -1521,15 +1596,16 @@ function applyFilters(){
     if (totMax !== null && r.total > totMax)                  return false;
     if (method && !(r.tests || []).some(t => t.method === method)) return false;
 
-    const hasShots = (r.tests || []).some(t => t.screenshotUrl);
+    const hasShots = (r.tests || []).some(t => getShots(t).length > 0);
     if (shotsF === 'yes' && !hasShots)                        return false;
     if (shotsF === 'no'  &&  hasShots)                        return false;
 
     if (q){
       const hay = (r.runId + ' ' + r.timestamp + ' ' + (r.platform || '') + ' ' +
-        (r.tests || []).map(t =>
-          t.method + ' ' + (t.errorMessage || '') + ' ' + (t.logs || '')
-        ).join(' ')
+        (r.tests || []).map(t => {
+          const labels = getShots(t).map(s => s.label).join(' ');
+          return t.method + ' ' + (t.errorMessage || '') + ' ' + (t.logs || '') + ' ' + labels;
+        }).join(' ')
       ).toLowerCase();
       if (!hay.includes(q)) return false;
     }
@@ -1662,33 +1738,51 @@ function platformBadge(p){
   </span>`;
 }
 
+/* ============================================================
+ *  GALLERY STRIP — flattens ALL screenshots from ALL tests
+ *  Each thumb knows its (testIdx, shotIdx) so the lightbox
+ *  can navigate through every shot in the run.
+ * ============================================================ */
 function buildGalleryStrip(run, idx){
-  const shots = (run.tests || [])
-    .map((t, ti) => ({t, ti}))
-    .filter(x => x.t.screenshotUrl);
+  const flat = [];
+  (run.tests || []).forEach((t, ti) => {
+    getShots(t).forEach((s, si) => {
+      flat.push({t, ti, s, si});
+    });
+  });
 
-  if (!shots.length) return '';
+  if (!flat.length) return '';
 
-  const thumbs = shots.map(({t, ti}) => `
+  const thumbs = flat.map(({t, ti, s, si}) => {
+    const labelHtml = s.label
+      ? `<div class="thumb-label">${escHtml(s.label)}</div>` : '';
+    const totalShots = getShots(t).length;
+    const badge = totalShots > 1
+      ? `<div class="thumb-badge">${si + 1}/${totalShots}</div>` : '';
+    return `
     <div class="gallery-thumb ${t.status}"
-         onclick="openLightbox(${idx},${ti})"
-         title="${escHtml(t.method)} — click to enlarge">
-      <img src="${t.screenshotUrl}" loading="lazy"
+         onclick="openLightbox(${idx},${ti},${si})"
+         title="${escHtml(t.method)}${s.label ? ' — ' + escHtml(s.label) : ''}">
+      <img src="${escAttr(s.url)}" loading="lazy"
            onerror="this.parentElement.style.display='none'"/>
       <div class="thumb-status">${t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭'}</div>
+      ${badge}
       <div class="thumb-overlay">
         <div class="thumb-method">${escHtml(t.method)}</div>
+        ${labelHtml}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
+  const first = flat[0];
   return `
     <div class="gallery-strip">
       <div class="gallery-head">
         <span class="gtitle">
           📸 Screenshots
-          <span class="count-badge">${shots.length}</span>
+          <span class="count-badge">${flat.length}</span>
         </span>
-        <button class="view-all" onclick="openLightbox(${idx},${shots[0].ti})">
+        <button class="view-all" onclick="openLightbox(${idx},${first.ti},${first.si})">
           Open viewer →
         </button>
       </div>
@@ -1696,6 +1790,9 @@ function buildGalleryStrip(run, idx){
     </div>`;
 }
 
+/* ============================================================
+ *  TEST CARDS — show every shot as a mini thumbnail
+ * ============================================================ */
 function buildTestsHtml(run, idx){
   return (run.tests || []).map((t, ti) => {
     const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
@@ -1715,9 +1812,27 @@ function buildTestsHtml(run, idx){
       </div>
       <div class="stack-box" id="${stackId}">${escHtml(t.stackTrace)}</div>` : '';
 
-    const shotHtml = t.screenshotUrl
-      ? `<div><span class="test-link" onclick="openLightbox(${idx},${ti})">📸 View screenshot</span></div>`
-      : '';
+    const shots = getShots(t);
+    let shotHtml = '';
+    if (shots.length === 1){
+      const lbl = shots[0].label ? ` — ${escHtml(shots[0].label)}` : '';
+      shotHtml = `<div><span class="test-link" onclick="openLightbox(${idx},${ti},0)">📸 View screenshot${lbl}</span></div>`;
+    } else if (shots.length > 1){
+      const minis = shots.map((s, si) => `
+        <div class="test-shot-mini"
+             onclick="openLightbox(${idx},${ti},${si})"
+             title="${escAttr(s.label || ('Shot ' + (si + 1)))}">
+          <img src="${escAttr(s.url)}" loading="lazy"
+               onerror="this.parentElement.style.display='none'"/>
+          <div class="tsm-num">${si + 1}</div>
+          ${s.label ? `<div class="tsm-tip">${escHtml(s.label)}</div>` : ''}
+        </div>`).join('');
+      shotHtml = `
+        <div style="margin-top:8px;font-size:10px;color:var(--accent);font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">
+          📸 ${shots.length} screenshots
+        </div>
+        <div class="test-shots">${minis}</div>`;
+    }
 
     const icon = t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭';
     const iconColor = t.status === 'passed' ? 'var(--green)'
@@ -1787,26 +1902,32 @@ function toggleStack(id, el){
 }
 
 /* ============================================================
- *  LIGHTBOX
+ *  LIGHTBOX — now flattens (test, shot) pairs.
+ *  openLightbox(runIdx, testIdx, shotIdx) jumps to a specific shot
+ *  in the run, and ← / → walk through every shot of every test.
  * ============================================================ */
-function openLightbox(runIdx, testIdx){
+function openLightbox(runIdx, testIdx, shotIdx){
   state.lbList = [];
-  state.filteredRuns.forEach(run => {
-    (run.tests || []).forEach(t => {
-      if (t.screenshotUrl){
+  let target = -1;
+  state.filteredRuns.forEach((run, rIdx) => {
+    (run.tests || []).forEach((t, tIdx) => {
+      getShots(t).forEach((s, sIdx) => {
+        if (rIdx === runIdx && tIdx === testIdx && sIdx === (shotIdx || 0)){
+          target = state.lbList.length;
+        }
         state.lbList.push({
-          url:       t.screenshotUrl,
+          url:       s.url,
+          label:     s.label,
           runId:     run.runId,
           method:    t.method,
           timestamp: run.timestamp,
           status:    t.status
         });
-      }
+      });
     });
   });
-  const target = state.filteredRuns[runIdx]?.tests?.[testIdx];
-  state.lbIndex = target ? Math.max(0, state.lbList.findIndex(s =>
-    s.url === target.screenshotUrl && s.method === target.method)) : 0;
+  state.lbIndex = target >= 0 ? target : 0;
+  if (!state.lbList.length) return;
   showLightboxImage();
   document.getElementById('lightbox').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -1822,7 +1943,9 @@ function showLightboxImage(){
   if (!item) return;
   const img = document.getElementById('lbImg');
   img.src = item.url;
-  document.getElementById('lbTitle').textContent   = item.method;
+  const labelHtml = item.label
+    ? `<span class="lb-label">— ${escHtml(item.label)}</span>` : '';
+  document.getElementById('lbTitle').innerHTML    = `${escHtml(item.method)}${labelHtml}`;
   document.getElementById('lbMeta').textContent    = `${item.runId} · ${item.timestamp}`;
   document.getElementById('lbCounter').textContent = `${state.lbIndex + 1} / ${state.lbList.length}`;
   document.getElementById('lbPrev').disabled = state.lbIndex === 0;
@@ -1856,7 +1979,8 @@ document.getElementById('lbDownload').onclick = () => {
   const item = state.lbList[state.lbIndex]; if (!item) return;
   const a = document.createElement('a');
   a.href = item.url;
-  a.download = `${item.runId}_${item.method}.png`;
+  const labelPart = item.label ? '_' + item.label.replace(/[^A-Za-z0-9_-]/g,'_') : '';
+  a.download = `${item.runId}_${item.method}${labelPart}.png`;
   a.target = '_blank';
   a.click();
 };
@@ -1929,6 +2053,9 @@ function escHtml(s){
     .toString()
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function escAttr(s){
+  return (s ?? '').toString().replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 </script>
 </body>
