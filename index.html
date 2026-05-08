@@ -542,6 +542,205 @@
     gap:12px;
   }
 
+  /* ============== MASTER / DETAIL LAYOUT ============== */
+  .md-layout{
+    display:grid;grid-template-columns:260px minmax(0,1fr);
+    gap:14px;align-items:start;
+  }
+  @media (max-width:900px){
+    .md-layout{grid-template-columns:1fr;}
+  }
+
+  .md-master{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;
+    box-shadow:var(--shadow-sm);
+    max-height:600px;overflow-y:auto;
+    scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;
+  }
+  .md-master::-webkit-scrollbar{width:6px;}
+  .md-master::-webkit-scrollbar-track{background:transparent;}
+  .md-master::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px;}
+
+  .md-master-head{
+    padding:10px 14px;font-size:10px;font-weight:700;
+    color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;
+    border-bottom:1px solid var(--line);background:var(--panel-2);
+    position:sticky;top:0;z-index:1;
+  }
+  .md-item{
+    display:flex;align-items:center;gap:8px;
+    padding:11px 14px;cursor:pointer;font-size:12.5px;
+    border-bottom:1px solid var(--line);
+    border-left:2px solid transparent;
+    transition:background 0.12s,border-left-color 0.12s;
+  }
+  .md-item:last-child{border-bottom:none;}
+  .md-item:hover{background:var(--accent-soft);}
+  .md-item.active{
+    background:var(--accent-soft);
+    border-left-color:var(--accent);
+    font-weight:600;
+  }
+  .md-item .ic{flex-shrink:0;font-size:13px;font-weight:800;}
+  .md-item.passed  .ic{color:var(--green);}
+  .md-item.failed  .ic{color:var(--red);}
+  .md-item.skipped .ic{color:var(--amber);}
+  .md-item .nm{
+    flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;color:var(--text);
+  }
+  .md-item .badge{
+    flex-shrink:0;padding:2px 7px;border-radius:999px;
+    font-size:10px;font-family:'JetBrains Mono',monospace;
+    background:var(--accent-soft);color:var(--muted);
+  }
+  .md-item.failed .badge{background:var(--red-bg);color:var(--red);}
+
+  .md-detail{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:10px;padding:18px 20px;min-width:0;
+    box-shadow:var(--shadow-sm);
+  }
+  .md-detail-head{
+    display:flex;align-items:center;gap:10px;margin-bottom:4px;
+    flex-wrap:wrap;
+  }
+  .md-detail-head .h-icon{
+    font-size:18px;font-weight:800;flex-shrink:0;
+  }
+  .md-detail-head.passed  .h-icon{color:var(--green);}
+  .md-detail-head.failed  .h-icon{color:var(--red);}
+  .md-detail-head.skipped .h-icon{color:var(--amber);}
+  .md-detail-head .h-name{
+    font-size:15px;font-weight:700;color:var(--text);
+    flex:1;min-width:0;word-break:break-word;
+  }
+  .md-detail-meta{
+    font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;
+    margin-bottom:14px;
+  }
+  .md-detail-err{
+    color:var(--red);font-size:12px;
+    background:var(--red-bg);padding:10px 12px;border-radius:6px;
+    border-left:3px solid var(--red);margin-bottom:14px;
+    word-break:break-word;line-height:1.5;
+  }
+  .md-detail-section-title{
+    font-size:10px;color:var(--muted);font-weight:700;
+    letter-spacing:0.08em;text-transform:uppercase;
+    margin:0 0 8px;display:flex;align-items:center;gap:8px;
+  }
+  .md-detail-section-title .count-badge{
+    background:var(--accent-soft);color:var(--accent);
+    padding:1px 8px;border-radius:999px;
+    font-size:10px;font-family:'JetBrains Mono',monospace;
+  }
+
+  .md-shots-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));
+    gap:8px;margin-bottom:14px;
+  }
+  .md-shot{
+    position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;
+    border:1.5px solid var(--line-2);background:var(--bg-2);
+    cursor:zoom-in;transition:all 0.15s;
+  }
+  .md-shot:hover{
+    border-color:var(--accent);transform:translateY(-1px);
+    box-shadow:0 4px 10px -4px rgba(91,108,255,0.4);
+  }
+  .md-shot img{
+    width:100%;height:100%;object-fit:cover;display:block;background:#fff;
+  }
+  .md-shot .num{
+    position:absolute;top:3px;left:3px;
+    background:rgba(0,0,0,0.7);color:#fff;
+    font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;
+    padding:1px 5px;border-radius:3px;
+  }
+  .md-shot .lbl{
+    position:absolute;left:0;right:0;bottom:0;
+    background:linear-gradient(transparent,rgba(0,0,0,0.85));
+    color:#fff;font-size:8.5px;padding:8px 4px 3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    opacity:0;transition:opacity 0.15s;
+  }
+  .md-shot:hover .lbl{opacity:1;}
+
+  .md-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .md-btn{
+    background:var(--accent-soft);border:1px solid var(--accent-soft-2);
+    color:var(--accent);padding:6px 12px;border-radius:7px;cursor:pointer;
+    font-size:11px;font-weight:600;font-family:inherit;
+    display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;
+    letter-spacing:0.04em;text-transform:uppercase;
+  }
+  .md-btn:hover{background:var(--accent-soft-2);}
+  .md-btn.green{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+  .md-btn.green:hover{background:var(--green-bg);opacity:0.85;}
+
+  .md-collapsible{
+    display:none;margin-top:12px;background:var(--code-bg);
+    border-radius:6px;padding:10px 12px;
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;
+    white-space:pre-wrap;word-break:break-word;
+    max-height:280px;overflow-y:auto;
+    border:1px solid var(--line);color:var(--text);line-height:1.55;
+  }
+  .md-collapsible.open{display:block;}
+  .md-collapsible.stack{
+    border-left:2px solid var(--accent);color:var(--muted);font-size:10px;
+  }
+  .md-collapsible.logs{
+    border-left:2px solid var(--green);
+  }
+
+  /* ============== TYPE-TO-FILTER COMBOBOX ============== */
+  .combo{position:relative;}
+  .combo-input{
+    padding:9px 32px 9px 12px;border-radius:8px;border:1px solid var(--line-2);
+    background:var(--bg-2);color:var(--text);font-size:12px;
+    font-family:inherit;outline:none;width:100%;
+    transition:border-color 0.15s,background 0.15s;
+  }
+  .combo-input:focus{
+    border-color:var(--accent);background:var(--panel);
+  }
+  .combo-input::placeholder{color:var(--dim);}
+  .combo-clear{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    background:transparent;border:none;color:var(--dim);
+    cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;
+    display:none;
+  }
+  .combo.has-value .combo-clear{display:block;}
+  .combo-clear:hover{color:var(--text);background:var(--bg-2);}
+  .combo-list{
+    display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+    background:var(--panel);border:1px solid var(--line-2);
+    border-radius:8px;max-height:240px;overflow-y:auto;
+    box-shadow:var(--shadow-lg);z-index:20;
+    scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;
+  }
+  .combo-list::-webkit-scrollbar{width:6px;}
+  .combo-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:3px;}
+  .combo.open .combo-list{display:block;}
+  .combo-option{
+    padding:8px 12px;font-size:12px;color:var(--text);cursor:pointer;
+    transition:background 0.1s;
+  }
+  .combo-option:hover,.combo-option.highlight{
+    background:var(--accent-soft);
+  }
+  .combo-option .match{
+    color:var(--accent);font-weight:700;
+  }
+  .combo-empty{
+    padding:12px;font-size:11px;color:var(--dim);text-align:center;
+    font-style:italic;
+  }
+
   .test-row{
     background:var(--panel);border-radius:10px;padding:14px 16px;
     border-left:3px solid var(--dim);font-size:12px;
@@ -985,9 +1184,13 @@
 
       <div class="filter-field">
         <label>Test method</label>
-        <select class="filter-select" id="f-method" onchange="applyFilters()">
-          <option value="">All methods</option>
-        </select>
+        <div class="combo" id="methodCombo">
+          <input class="combo-input" id="f-method-input" type="text"
+                 placeholder="Type to search methods..." autocomplete="off"/>
+          <input type="hidden" id="f-method"/>
+          <button class="combo-clear" type="button" onclick="clearMethodFilter()" title="Clear">×</button>
+          <div class="combo-list" id="methodComboList"></div>
+        </div>
       </div>
 
       <div class="filter-field">
@@ -1132,6 +1335,8 @@ const state = {
   lbZoom:        1,
   lbPanX:        0,
   lbPanY:        0,
+  methodList:    [],
+  activeTest:    {},   // map of runIdx → testIdx for master/detail
 };
 
 /* ============================================================
@@ -1182,6 +1387,7 @@ fetch('history.json?t=' + Date.now())
     runs.sort((a,b) => b.epochMs - a.epochMs);
     state.allRuns = runs;
     populateMethodFilter(runs);
+    initMethodCombo();
     renderStats(runs);
     renderDonut(runs);
     applyFilters();
@@ -1537,11 +1743,93 @@ function niceCeil(n){
 function populateMethodFilter(runs){
   const methods = new Set();
   runs.forEach(r => (r.tests || []).forEach(t => methods.add(t.method)));
-  const sel = document.getElementById('f-method');
-  [...methods].sort().forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m; opt.textContent = m;
-    sel.appendChild(opt);
+  state.methodList = [...methods].sort();
+  renderMethodOptions(''); // initial render — show everything
+}
+
+/* ---------- searchable combobox for "Test method" ---------- */
+function renderMethodOptions(query){
+  const list = document.getElementById('methodComboList');
+  const q = (query || '').toLowerCase().trim();
+  const matches = q
+    ? state.methodList.filter(m => m.toLowerCase().includes(q))
+    : state.methodList.slice(0, 200);
+
+  if (!matches.length){
+    list.innerHTML = '<div class="combo-empty">No matching methods</div>';
+    return;
+  }
+
+  list.innerHTML = matches.map((m, i) => {
+    let display = escHtml(m);
+    if (q){
+      const lc = m.toLowerCase();
+      const idx = lc.indexOf(q);
+      if (idx >= 0){
+        display = escHtml(m.slice(0, idx))
+                + '<span class="match">' + escHtml(m.slice(idx, idx + q.length)) + '</span>'
+                + escHtml(m.slice(idx + q.length));
+      }
+    }
+    return `<div class="combo-option" data-value="${escAttr(m)}"
+              onmousedown="selectMethod('${escAttr(m)}')">${display}</div>`;
+  }).join('');
+}
+
+function selectMethod(method){
+  document.getElementById('f-method').value = method;
+  document.getElementById('f-method-input').value = method;
+  document.getElementById('methodCombo').classList.add('has-value');
+  document.getElementById('methodCombo').classList.remove('open');
+  applyFilters();
+}
+
+function clearMethodFilter(){
+  document.getElementById('f-method').value = '';
+  document.getElementById('f-method-input').value = '';
+  document.getElementById('methodCombo').classList.remove('has-value','open');
+  renderMethodOptions('');
+  applyFilters();
+}
+
+/* Wire combobox events once DOM is ready */
+function initMethodCombo(){
+  const combo = document.getElementById('methodCombo');
+  const input = document.getElementById('f-method-input');
+  if (!combo || !input) return;
+
+  input.addEventListener('focus', () => {
+    renderMethodOptions(input.value);
+    combo.classList.add('open');
+  });
+  input.addEventListener('input', () => {
+    renderMethodOptions(input.value);
+    combo.classList.add('open');
+    combo.classList.toggle('has-value', input.value.length > 0);
+    // While the user is typing, treat partial text as exact match only when it
+    // matches a method exactly. Otherwise the filter waits for a click.
+    const exact = state.methodList.find(m => m === input.value);
+    document.getElementById('f-method').value = exact || '';
+    if (exact) applyFilters();
+    else if (!input.value){
+      document.getElementById('f-method').value = '';
+      applyFilters();
+    }
+  });
+  // Close when clicking elsewhere
+  document.addEventListener('mousedown', e => {
+    if (!combo.contains(e.target)) combo.classList.remove('open');
+  });
+  // Keyboard: Enter selects first match, Escape closes
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      const first = combo.querySelector('.combo-option');
+      if (first) selectMethod(first.dataset.value);
+    } else if (e.key === 'Escape'){
+      combo.classList.remove('open');
+      input.blur();
+    }
   });
 }
 
@@ -1559,6 +1847,8 @@ function resetFilters(){
   ['f-search','f-date-from','f-date-to','f-rate-min','f-rate-max',
    'f-total-min','f-total-max'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-method').value = '';
+  document.getElementById('f-method-input').value = '';
+  document.getElementById('methodCombo').classList.remove('has-value','open');
   document.getElementById('f-platform').value = '';
   document.getElementById('f-screenshots').value = 'any';
   document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.remove('active'));
@@ -1613,6 +1903,7 @@ function applyFilters(){
   });
 
   state.currentPage = 1;
+  state.activeTest = {};   // indices may have shifted — re-pick defaults next render
   applySort();
   renderTrend(state.filteredRuns);
   renderDonut(state.filteredRuns);
@@ -1655,6 +1946,7 @@ function doSort(){
     if (va > vb) return  1 * d;
     return 0;
   });
+  state.activeTest = {};   // sort changed indices
 }
 
 /* ============================================================
@@ -1717,7 +2009,7 @@ function renderTable(){
     <tr class="run-detail" id="detail_${idx}">
       <td colspan="10"><div class="detail-inner">
         ${buildGalleryStrip(run, idx)}
-        <div class="detail-grid">${buildTestsHtml(run, idx)}</div>
+        ${buildMasterDetail(run, idx)}
       </div></td>
     </tr>`;
   }).join('');
@@ -1848,6 +2140,115 @@ function buildTestsHtml(run, idx){
         ${errHtml}${logsHtml}${stackHtml}${shotHtml}
       </div>`;
   }).join('');
+}
+
+/* ============================================================
+ *  MASTER / DETAIL VIEW
+ *  Left: a clickable list of tests in the run.
+ *  Right: full details (error, screenshots, logs, stack) for the
+ *  selected test. Defaults to the first failed test if any, else
+ *  the first test in the run.
+ * ============================================================ */
+function buildMasterDetail(run, idx){
+  const tests = run.tests || [];
+  if (!tests.length){
+    return '<div style="padding:20px;color:var(--muted);font-size:12px;text-align:center;">No tests in this run.</div>';
+  }
+
+  // Pick a sensible default: first failure, else first test
+  if (state.activeTest[idx] == null){
+    const firstFail = tests.findIndex(t => t.status === 'failed');
+    state.activeTest[idx] = firstFail >= 0 ? firstFail : 0;
+  }
+
+  return `
+    <div class="md-layout">
+      <div class="md-master" id="master_${idx}">
+        <div class="md-master-head">${tests.length} ${tests.length === 1 ? 'test' : 'tests'}</div>
+        ${tests.map((t, ti) => buildMasterItem(idx, t, ti)).join('')}
+      </div>
+      <div class="md-detail" id="detail-pane_${idx}">
+        ${buildDetailPane(run, idx, state.activeTest[idx])}
+      </div>
+    </div>`;
+}
+
+function buildMasterItem(idx, t, ti){
+  const icon = t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭';
+  const isActive = state.activeTest[idx] === ti;
+  const shots = getShots(t);
+  return `
+    <div class="md-item ${t.status} ${isActive ? 'active' : ''}"
+         onclick="selectMdTest(${idx}, ${ti})">
+      <span class="ic">${icon}</span>
+      <span class="nm" title="${escAttr(t.method)}">${escHtml(t.method)}</span>
+      ${shots.length ? `<span class="badge">${shots.length}</span>` : ''}
+    </div>`;
+}
+
+function selectMdTest(idx, ti){
+  state.activeTest[idx] = ti;
+  // Update master list highlight without re-rendering whole table
+  const master = document.getElementById('master_' + idx);
+  if (master){
+    master.querySelectorAll('.md-item').forEach((el, i) => {
+      el.classList.toggle('active', i === ti);
+    });
+  }
+  // Re-render only the detail pane
+  const pane = document.getElementById('detail-pane_' + idx);
+  if (pane){
+    const run = state.filteredRuns[idx];
+    if (run) pane.innerHTML = buildDetailPane(run, idx, ti);
+  }
+}
+
+function buildDetailPane(run, idx, ti){
+  const t = (run.tests || [])[ti];
+  if (!t) return '<div style="color:var(--muted);font-size:12px;">Select a test on the left.</div>';
+
+  const icon = t.status === 'passed' ? '✓' : t.status === 'failed' ? '✗' : '⏭';
+  const errMsg = (t.errorMessage || '').split('\n')[0].split('\\n')[0];
+  const errHtml = errMsg
+    ? `<div class="md-detail-err">${escHtml(errMsg)}</div>`
+    : '';
+
+  const shots = getShots(t);
+  let shotsHtml = '';
+  if (shots.length){
+    const tiles = shots.map((s, si) => `
+      <div class="md-shot" onclick="openLightbox(${idx},${ti},${si})"
+           title="${escAttr(s.label || ('Shot ' + (si + 1)))}">
+        <img src="${escAttr(s.url)}" loading="lazy"
+             onerror="this.parentElement.style.display='none'"/>
+        <div class="num">${si + 1}</div>
+        ${s.label ? `<div class="lbl">${escHtml(s.label)}</div>` : ''}
+      </div>`).join('');
+    shotsHtml = `
+      <div class="md-detail-section-title">
+        📸 Screenshots <span class="count-badge">${shots.length}</span>
+      </div>
+      <div class="md-shots-grid">${tiles}</div>`;
+  }
+
+  const logsId  = `mdlogs_${idx}_${ti}`;
+  const stackId = `mdstack_${idx}_${ti}`;
+  const actions = [];
+  if (t.logs)       actions.push(`<button class="md-btn green" onclick="toggleStack('${logsId}',this)">📜 Logs</button>`);
+  if (t.stackTrace) actions.push(`<button class="md-btn" onclick="toggleStack('${stackId}',this)">🐛 Stack trace</button>`);
+
+  return `
+    <div class="md-detail-head ${t.status}">
+      <span class="h-icon">${icon}</span>
+      <span class="h-name">${escHtml(t.method)}</span>
+    </div>
+    <div class="md-detail-meta">${t.duration} ms · started ${escHtml(t.startTime)}</div>
+    ${errHtml}
+    ${shotsHtml}
+    ${actions.length ? `<div class="md-actions">${actions.join('')}</div>` : ''}
+    ${t.logs       ? `<div class="md-collapsible logs"  id="${logsId}">${escHtml(t.logs)}</div>` : ''}
+    ${t.stackTrace ? `<div class="md-collapsible stack" id="${stackId}">${escHtml(t.stackTrace)}</div>` : ''}
+  `;
 }
 
 /* ============================================================
