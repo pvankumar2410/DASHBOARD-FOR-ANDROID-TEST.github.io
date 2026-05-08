@@ -952,9 +952,6 @@
   .lightbox-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .lightbox-title{font-size:14px;font-weight:600;color:#fff;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .lightbox-title .lb-label{
-    color:#a78bfa;margin-left:8px;font-weight:500;font-size:12px;
-  }
   .lightbox-meta{font-size:11px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .lightbox-counter{font-size:11px;color:#9ba1b3;
@@ -977,7 +974,7 @@
   }
   .lightbox-stage.grabbing{cursor:grabbing;}
   .lightbox-stage img{
-    max-width:90%;max-height:90%;border-radius:6px;
+    max-width:90%;max-height:88%;border-radius:6px;
     transform-origin:center;transition:transform 0.15s ease-out;
     user-select:none;-webkit-user-drag:none;
     box-shadow:0 30px 80px -20px rgba(0,0,0,0.8);
@@ -993,11 +990,61 @@
   .lb-nav:hover{background:rgba(255,255,255,0.1);}
   .lb-nav.prev{left:24px;}
   .lb-nav.next{right:24px;}
+
+  /* ============== STEP-LABEL CAPTION STRIP ============== */
+  .lb-caption{
+    background:rgba(124,140,255,0.12);
+    border-top:1px solid rgba(124,140,255,0.25);
+    padding:10px 24px;
+    display:flex;align-items:center;gap:10px;
+    flex-shrink:0;
+  }
+  .lb-caption.empty{display:none;}
+  .lb-caption .lc-num{
+    flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+    min-width:24px;height:22px;padding:0 7px;border-radius:999px;
+    background:rgba(124,140,255,0.25);color:#a5b4fc;
+    font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;
+  }
+  .lb-caption .lc-label{
+    font-size:13px;font-weight:500;color:#c7d2fe;
+    flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .lb-caption .lc-tag{
+    font-size:10px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;
+    margin-left:auto;text-transform:uppercase;letter-spacing:0.06em;
+    flex-shrink:0;
+  }
+
   .lb-hint{
-    position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
-    font-size:11px;color:#9ba1b3;font-family:'JetBrains Mono',monospace;
-    background:rgba(0,0,0,0.5);padding:6px 14px;border-radius:999px;
-    border:1px solid rgba(255,255,255,0.08);
+    text-align:center;
+    font-size:10.5px;color:#7a829a;font-family:'JetBrains Mono',monospace;
+    padding:6px 14px;
+    background:rgba(0,0,0,0.4);
+    border-top:1px solid rgba(255,255,255,0.04);
+  }
+
+  /* ============== CLOSE-RUN HEADER (above master/detail) ============== */
+  .md-close-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:14px;padding:8px 12px;
+    background:var(--accent-soft);border:1px solid var(--accent-soft-2);
+    border-radius:8px;
+  }
+  .md-close-bar .info{
+    font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    display:flex;align-items:center;gap:8px;
+  }
+  .md-close-bar .info strong{color:var(--accent);}
+  .md-close-bar .close-btn{
+    background:transparent;border:1px solid var(--line-2);color:var(--text);
+    padding:6px 14px;border-radius:7px;cursor:pointer;
+    font-size:11px;font-weight:600;font-family:inherit;
+    display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;
+    letter-spacing:0.04em;text-transform:uppercase;
+  }
+  .md-close-bar .close-btn:hover{
+    background:var(--red-bg);border-color:var(--red);color:var(--red);
   }
 
   /* ============== PAGINATION ============== */
@@ -1294,8 +1341,13 @@
     <button class="lb-nav prev" id="lbPrev" title="Previous (←)">‹</button>
     <img id="lbImg" src="" alt="screenshot"/>
     <button class="lb-nav next" id="lbNext" title="Next (→)">›</button>
-    <div class="lb-hint">← → navigate · scroll to zoom · drag to pan · esc to close</div>
   </div>
+  <div class="lb-caption empty" id="lbCaption">
+    <div class="lc-num" id="lbCaptionNum">1</div>
+    <span class="lc-label" id="lbCaptionLabel"></span>
+    <span class="lc-tag">Step label</span>
+  </div>
+  <div class="lb-hint">← → navigate · scroll to zoom · drag to pan · esc to close</div>
 </div>
 
 <footer id="footerText">MAS Flow Dashboard</footer>
@@ -2162,6 +2214,16 @@ function buildMasterDetail(run, idx){
   }
 
   return `
+    <div class="md-close-bar">
+      <span class="info">
+        <strong>${escHtml(run.runId)}</strong>
+        <span style="opacity:0.6;">·</span>
+        <span>${tests.length} ${tests.length === 1 ? 'test' : 'tests'}</span>
+      </span>
+      <button class="close-btn" onclick="closeDetail(${idx})">
+        ✕ Close run
+      </button>
+    </div>
     <div class="md-layout">
       <div class="md-master" id="master_${idx}">
         <div class="md-master-head">${tests.length} ${tests.length === 1 ? 'test' : 'tests'}</div>
@@ -2296,6 +2358,20 @@ function toggleDetail(idx, btn){
   }
 }
 
+/** Closes a run's master/detail panel and resets the original toggle button. */
+function closeDetail(idx){
+  const row = document.getElementById('detail_' + idx);
+  if (row) row.classList.remove('open');
+  // Find the matching expand button in the row above and reset its state
+  const runRow = document.querySelector(`tr.run-row[data-idx="${idx}"]`);
+  if (runRow){
+    const btn = runRow.querySelector('.expand-btn');
+    if (btn) btn.classList.remove('open');
+    // Scroll the run row back into view in case the panel was tall
+    runRow.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+}
+
 function toggleStack(id, el){
   const box = document.getElementById(id);
   if (box) box.classList.toggle('open');
@@ -2344,11 +2420,22 @@ function showLightboxImage(){
   if (!item) return;
   const img = document.getElementById('lbImg');
   img.src = item.url;
-  const labelHtml = item.label
-    ? `<span class="lb-label">— ${escHtml(item.label)}</span>` : '';
-  document.getElementById('lbTitle').innerHTML    = `${escHtml(item.method)}${labelHtml}`;
+  // Header: just the test method + run metadata (clean, no inline label)
+  document.getElementById('lbTitle').textContent   = item.method;
   document.getElementById('lbMeta').textContent    = `${item.runId} · ${item.timestamp}`;
   document.getElementById('lbCounter').textContent = `${state.lbIndex + 1} / ${state.lbList.length}`;
+  // Caption strip: shows the screenshot label (e.g. "openFlightSection")
+  // — only visible when the shot has a label.
+  const cap   = document.getElementById('lbCaption');
+  const capN  = document.getElementById('lbCaptionNum');
+  const capL  = document.getElementById('lbCaptionLabel');
+  if (item.label){
+    capN.textContent = state.lbIndex + 1;
+    capL.textContent = item.label;
+    cap.classList.remove('empty');
+  } else {
+    cap.classList.add('empty');
+  }
   document.getElementById('lbPrev').disabled = state.lbIndex === 0;
   document.getElementById('lbNext').disabled = state.lbIndex === state.lbList.length - 1;
   resetZoom();
@@ -2424,6 +2511,21 @@ window.addEventListener('keydown', e => {
   else if (e.key === '-')      setZoom(state.lbZoom / 1.25);
   else if (e.key === '0')      resetZoom();
   else if (e.key.toLowerCase() === 'd') document.getElementById('lbDownload').click();
+});
+
+/* Escape closes any open run-detail panel (when lightbox isn't open).
+   Closes the most-recently opened panel only — leave the rest alone. */
+window.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('lightbox').classList.contains('active')) return;
+  // Don't hijack Escape if the user is typing in a filter
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const open = document.querySelectorAll('tr.run-detail.open');
+  if (!open.length) return;
+  const last = open[open.length - 1];
+  const idxMatch = last.id.match(/^detail_(\d+)$/);
+  if (idxMatch) closeDetail(Number(idxMatch[1]));
 });
 
 stage.addEventListener('click', e => {
