@@ -1,0 +1,66 @@
+[
+  {
+    "epochMs": 1781335762104,
+    "total": 2,
+    "tests": [
+      {
+        "duration": 4070,
+        "screenshotUrl": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335770/playwright/screenshots/Screenshot-Launch-png-671fb9ebc36b197866ce97cc7d086ee5cc342488_ifb5rb.png",
+        "method": "Launch2",
+        "errorMessage": "",
+        "className": " > chromium > MHflow.spec.ts",
+        "startTime": "2026-06-13T07:29:22.591Z",
+        "stackTrace": "",
+        "logs": "{\"test\":\"Launch2\",\"entries\":[{\"ts\":\"2026-06-13T07:29:22.616Z\",\"level\":\"INFO\",\"message\":\"Start :: MHflow.spec.ts > Launch2\"},{\"ts\":\"2026-06-13T07:29:23.456Z\",\"level\":\"STEP\",\"message\":\"Launching URL: https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:23.557Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:24.071Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:24.106Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:24.708Z\",\"level\":\"INFO\",\"message\":\"URL launched, asserting page is ready\"},{\"ts\":\"2026-06-13T07:29:26.204Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:26.603Z\",\"level\":\"STEP\",\"message\":\"Launch flow completed\"},{\"ts\":\"2026-06-13T07:29:27.162Z\",\"level\":\"INFO\",\"message\":\"End :: status=passed duration=3513ms\"}]}",
+        "screenshots": [
+          {
+            "fileName": "Screenshot-Launch-png-671fb9ebc36b197866ce97cc7d086ee5cc342488.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335770/playwright/screenshots/Screenshot-Launch-png-671fb9ebc36b197866ce97cc7d086ee5cc342488_ifb5rb.png"
+          },
+          {
+            "fileName": "Screenshot-Launch-png-6f159b150ce90130d092035d8473bf3da119598d.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335771/playwright/screenshots/Screenshot-Launch-png-6f159b150ce90130d092035d8473bf3da119598d_pn4uyy.png"
+          }
+        ],
+        "status": "passed"
+      },
+      {
+        "duration": 4930,
+        "screenshotUrl": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335770/playwright/screenshots/Screenshot-Launch-png-a1186a6c58473adeff534cd1886e68f01806ee6f_fbxpqx.png",
+        "method": "Launch",
+        "errorMessage": "",
+        "className": " > chromium > MHflow.spec.ts",
+        "startTime": "2026-06-13T07:29:22.587Z",
+        "stackTrace": "",
+        "logs": "{\"test\":\"Launch\",\"entries\":[{\"ts\":\"2026-06-13T07:29:22.610Z\",\"level\":\"INFO\",\"message\":\"Start :: MHflow.spec.ts > Launch\"},{\"ts\":\"2026-06-13T07:29:23.818Z\",\"level\":\"STEP\",\"message\":\"Launching URL: https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:23.896Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:24.207Z\",\"level\":\"INFO\",\"message\":\"URL launched, asserting page is ready\"},{\"ts\":\"2026-06-13T07:29:24.294Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:24.320Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:26.458Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:29:26.996Z\",\"level\":\"STEP\",\"message\":\"Launch flow completed\"},{\"ts\":\"2026-06-13T07:29:27.607Z\",\"level\":\"WARN\",\"message\":\"request failed :: https://www.google.com/ccm/collect?rcb=13&frm=0&auid=224689590.1781335767&dt=Malaysia%20Airlines%20Official%20Website%20%E2%80%93%20Book%20Flights&en=page_view&dl=https%3A%2F%2Fwww.malaysiaairlines.com%2Fmy%2Fen%2Fhome.html&scrsrc=www.googletagmanager.com&rnd=1952424055.1781335767&navt=n&npa=0&gtm=45fe66a1v9184608104za200zd9184608104xec&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938469~119392697~119392705~119456239~119456247&apve=1&apvf=f&apvc=1&tids=DC-10314538&tid=DC-10314538&tft=1781335767385&tfd=3559 (net::ERR_ABORTED)\"},{\"ts\":\"2026-06-13T07:29:28.032Z\",\"level\":\"WARN\",\"message\":\"request failed :: https://c1.adform.net/imatch/pixels?bt=0&uid=3938134216816514659&agencyId=7340&advertiserId=2233859&src=tp&rnd=780224 (net::ERR_ABORTED)\"},{\"ts\":\"2026-06-13T07:29:28.049Z\",\"level\":\"INFO\",\"message\":\"End :: status=passed duration=4176ms\"}]}",
+        "screenshots": [
+          {
+            "fileName": "Screenshot-Launch-png-a1186a6c58473adeff534cd1886e68f01806ee6f.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335770/playwright/screenshots/Screenshot-Launch-png-a1186a6c58473adeff534cd1886e68f01806ee6f_fbxpqx.png"
+          },
+          {
+            "fileName": "Screenshot-Launch-png-6d7aea58eb509ed02773f4245c3d131f28090717.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335771/playwright/screenshots/Screenshot-Launch-png-6d7aea58eb509ed02773f4245c3d131f28090717_k37x1e.png"
+          },
+          {
+            "fileName": "Screenshot-Launch-png-05bacfee260b961a94c03b5abcdcd1e1cada4d42.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781335771/playwright/screenshots/Screenshot-Launch-png-05bacfee260b961a94c03b5abcdcd1e1cada4d42_xuveyb.png"
+          }
+        ],
+        "status": "passed"
+      }
+    ],
+    "passRate": 100,
+    "runId": "run-1781335762104",
+    "passed": 2,
+    "failed": 0,
+    "platform": "win32",
+    "timestamp": "2026-06-13T07:29:22.104Z",
+    "skipped": 0
+  }
+]
