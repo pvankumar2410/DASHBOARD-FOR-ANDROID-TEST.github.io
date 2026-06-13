@@ -14388,5 +14388,69 @@
     "platform": "win32",
     "timestamp": "2026-06-13T07:31:55.899Z",
     "skipped": 0
+  },
+  {
+    "epochMs": 1781336147040,
+    "total": 2,
+    "tests": [
+      {
+        "duration": 4001,
+        "screenshotUrl": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336155/playwright/screenshots/Screenshot-Launch-png-027c049fa314c6138475302ff549d43770b0d0f1_aewjwg.png",
+        "method": "Launch2",
+        "errorMessage": "",
+        "className": " > chromium > MHflow.spec.ts",
+        "startTime": "2026-06-13T07:35:47.482Z",
+        "stackTrace": "",
+        "logs": "{\"test\":\"Launch2\",\"entries\":[{\"ts\":\"2026-06-13T07:35:47.505Z\",\"level\":\"INFO\",\"message\":\"Start :: MHflow.spec.ts > Launch2\"},{\"ts\":\"2026-06-13T07:35:48.207Z\",\"level\":\"STEP\",\"message\":\"Launching URL: https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:48.308Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:48.837Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:48.869Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:49.532Z\",\"level\":\"INFO\",\"message\":\"URL launched, asserting page is ready\"},{\"ts\":\"2026-06-13T07:35:51.046Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:51.439Z\",\"level\":\"STEP\",\"message\":\"Launch flow completed\"},{\"ts\":\"2026-06-13T07:35:51.852Z\",\"level\":\"ERROR\",\"message\":\"pageerror :: Cannot read properties of undefined (reading 'ondValueFrom')\"},{\"ts\":\"2026-06-13T07:35:51.854Z\",\"level\":\"ERROR\",\"message\":\"pageerror :: Cannot read properties of undefined (reading 'ondValueFrom')\"},{\"ts\":\"2026-06-13T07:35:51.856Z\",\"level\":\"ERROR\",\"message\":\"pageerror :: Cannot read properties of undefined (reading 'ondValueFrom')\"},{\"ts\":\"2026-06-13T07:35:51.940Z\",\"level\":\"INFO\",\"message\":\"End :: status=passed duration=3499ms\"}]}",
+        "screenshots": [
+          {
+            "fileName": "Screenshot-Launch-png-027c049fa314c6138475302ff549d43770b0d0f1.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336155/playwright/screenshots/Screenshot-Launch-png-027c049fa314c6138475302ff549d43770b0d0f1_aewjwg.png"
+          },
+          {
+            "fileName": "Screenshot-Launch-png-62076ca510301464e8d4a949ae99ac6ef3666810.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336156/playwright/screenshots/Screenshot-Launch-png-62076ca510301464e8d4a949ae99ac6ef3666810_zpzc88.png"
+          }
+        ],
+        "status": "passed"
+      },
+      {
+        "duration": 4649,
+        "screenshotUrl": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336155/playwright/screenshots/Screenshot-Launch-png-f476b85473d12769e7cc88d3ac15bc1444d56a54_dfyaym.png",
+        "method": "Launch",
+        "errorMessage": "",
+        "className": " > chromium > MHflow.spec.ts",
+        "startTime": "2026-06-13T07:35:47.468Z",
+        "stackTrace": "",
+        "logs": "{\"test\":\"Launch\",\"entries\":[{\"ts\":\"2026-06-13T07:35:47.493Z\",\"level\":\"INFO\",\"message\":\"Start :: MHflow.spec.ts > Launch\"},{\"ts\":\"2026-06-13T07:35:48.638Z\",\"level\":\"STEP\",\"message\":\"Launching URL: https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:48.689Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:49.014Z\",\"level\":\"INFO\",\"message\":\"URL launched, asserting page is ready\"},{\"ts\":\"2026-06-13T07:35:49.121Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:49.156Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:50.866Z\",\"level\":\"STEP\",\"message\":\"Launch flow completed\"},{\"ts\":\"2026-06-13T07:35:51.182Z\",\"level\":\"STEP\",\"message\":\"navigated -> https://www.malaysiaairlines.com/my/en/home.html\"},{\"ts\":\"2026-06-13T07:35:52.287Z\",\"level\":\"WARN\",\"message\":\"request failed :: https://www.google.com/ccm/collect?rcb=18&frm=0&auid=525756197.1781336152&dt=Malaysia%20Airlines%20Official%20Website%20%E2%80%93%20Book%20Flights&en=page_view&dl=https%3A%2F%2Fwww.malaysiaairlines.com%2Fmy%2Fen%2Fhome.html&scrsrc=www.googletagmanager.com&rnd=1011851221.1781336152&navt=n&npa=0&gtm=45fe66a1v9184608104za200zd9184608104xec&gcd=13l3l3l3l1l1&dma=0&tag_exp=115616986~115938465~115938469~119392696~119392704~119456239~119456247&apve=1&apvf=f&apvc=1&tids=DC-10314538&tid=DC-10314538&tft=1781336152119&tfd=3475 (net::ERR_ABORTED)\"},{\"ts\":\"2026-06-13T07:35:52.568Z\",\"level\":\"INFO\",\"message\":\"End :: status=passed duration=3864ms\"}]}",
+        "screenshots": [
+          {
+            "fileName": "Screenshot-Launch-png-f476b85473d12769e7cc88d3ac15bc1444d56a54.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336155/playwright/screenshots/Screenshot-Launch-png-f476b85473d12769e7cc88d3ac15bc1444d56a54_dfyaym.png"
+          },
+          {
+            "fileName": "Screenshot-Launch-png-74cc629cbf60487b57ea72fe3f01fb999e9707ef.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336156/playwright/screenshots/Screenshot-Launch-png-74cc629cbf60487b57ea72fe3f01fb999e9707ef_wql92g.png"
+          },
+          {
+            "fileName": "Screenshot-Launch-png-fedd2a315f339f0c5ff31ac0ef5fe1e6e05a8da5.png",
+            "label": "Screenshot/Launch.png",
+            "url": "https://res.cloudinary.com/dphb9swru/image/upload/v1781336156/playwright/screenshots/Screenshot-Launch-png-fedd2a315f339f0c5ff31ac0ef5fe1e6e05a8da5_lirug7.png"
+          }
+        ],
+        "status": "passed"
+      }
+    ],
+    "passRate": 100,
+    "runId": "run-1781336147040",
+    "passed": 2,
+    "failed": 0,
+    "platform": "WEB",
+    "timestamp": "2026-06-13T07:35:47.040Z",
+    "skipped": 0
   }
 ]
